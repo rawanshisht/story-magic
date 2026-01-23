@@ -5,18 +5,8 @@ import {
   View,
   Image,
   StyleSheet,
-  Font,
 } from "@react-pdf/renderer";
 import { StoryPage } from "@/types";
-
-// Register fonts (optional - uses built-in fonts by default)
-Font.register({
-  family: "Helvetica",
-  fonts: [
-    { src: "Helvetica" },
-    { src: "Helvetica-Bold", fontWeight: "bold" },
-  ],
-});
 
 const styles = StyleSheet.create({
   page: {
