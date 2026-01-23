@@ -63,7 +63,7 @@ export default function CreateStoryPage() {
           setChildren(data);
 
           // Check for childId in URL
-          const childIdParam = searchParams.get("childId");
+          const childIdParam = searchParams?.get("childId");
           if (childIdParam) {
             setSelectedChildId(childIdParam);
           }
