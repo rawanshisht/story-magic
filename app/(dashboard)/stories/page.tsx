@@ -13,13 +13,13 @@ import {
 } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils";
 import { BookOpen, Sparkles, ArrowLeft, Trash2, Download } from "lucide-react";
-import { StoryPage } from "@/types";
+import { Story, StoryPage } from "@/types";
 import { getMoralById } from "@/config/morals";
 
 export default async function StoriesPage() {
   const session = await getServerSession(authOptions);
 
-  const stories = await prisma.story.findMany({
+  const stories: Story[] = await prisma.story.findMany({
     where: { userId: session?.user?.id },
     include: { child: true },
     orderBy: { createdAt: "desc" },
@@ -116,7 +116,7 @@ export default async function StoriesPage() {
                     </CardTitle>
                   </Link>
                   <CardDescription>
-                    For {story.child.name} &bull; {formatDate(story.createdAt)}
+                    For {story.child?.name} &bull; {formatDate(story.createdAt)}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

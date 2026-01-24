@@ -13,12 +13,12 @@ import {
 } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils";
 import { Plus, BookOpen, User, Sparkles } from "lucide-react";
-import { StoryPage } from "@/types";
+import { Child, Story, StoryPage } from "@/types";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
 
-  const [children, stories] = await Promise.all([
+  const [children, stories]: [Child[], Story[]] = await Promise.all([
     prisma.child.findMany({
       where: { userId: session?.user?.id },
       orderBy: { createdAt: "desc" },
@@ -230,7 +230,7 @@ export default async function DashboardPage() {
                         {story.title}
                       </CardTitle>
                       <CardDescription>
-                        For {story.child.name} &bull;{" "}
+                        For {story.child?.name} &bull;{" "}
                         {formatDate(story.createdAt)}
                       </CardDescription>
                     </CardHeader>

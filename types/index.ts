@@ -6,7 +6,7 @@ export interface Child {
   skinTone: string;
   eyeColor: string;
   hairColor: string;
-  hairStyle?: string;
+  hairStyle?: string | null;
   interests: string[];
   userId: string;
   createdAt: Date;
@@ -23,7 +23,7 @@ export interface Story {
   id: string;
   title: string;
   moral: string;
-  content: StoryPage[];
+  content: unknown;
   childId: string;
   child?: Child;
   userId: string;
