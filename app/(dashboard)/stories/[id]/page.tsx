@@ -12,15 +12,16 @@ import { formatDate } from "@/lib/utils";
 import { getMoralById } from "@/config/morals";
 
 interface StoryPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default async function StoryViewPage({ params }: StoryPageProps) {
   const session = await getServerSession(authOptions);
+  const { id } = await params;
 
   const story = await prisma.story.findUnique({
     where: {
-      id: params.id,
+      id: id,
       userId: session?.user?.id,
     },
     include: {
