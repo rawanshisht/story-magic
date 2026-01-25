@@ -26,7 +26,7 @@ export function Hero() {
 
           <p className="mb-10 mx-auto max-w-2xl text-xl md:text-2xl text-muted-foreground animate-in" style={{ animationDelay: "0.2s" }}>
             Transform your child into the hero of their own personalized
-            storybook. AI-generated tales with beautiful illustrations, tailored
+            story. AI-generated tales with beautiful illustrations, tailored
             to their age and featuring important life lessons.
           </p>
 

@@ -28,7 +28,7 @@ export async function generatePDF(options: PDFGeneratorOptions): Promise<Buffer>
         autoFirstPage: false,
         info: {
           Title: options.title,
-          Author: "StoryBook",
+          Author: "Story Magic",
           Subject: `A story about ${options.moral} featuring ${options.childName}`,
         },
       });
@@ -86,7 +86,7 @@ function createCoverPage(doc: PDFKit.PDFDocument, options: PDFGeneratorOptions):
 
   // Footer
   doc.fontSize(18)
-    .text("Created with StoryBook", 50, 550, {
+    .text("Created with Story Magic", 50, 550, {
       align: "center",
       width: pageWidth - 100,
     });
@@ -196,7 +196,7 @@ function createEndPage(doc: PDFKit.PDFDocument, options: PDFGeneratorOptions): v
 
   // Footer
   doc.fontSize(14)
-    .text("This story was created with love by StoryBook", 50, 550, {
+    .text("This story was created with love by Story Magic", 50, 550, {
       align: "center",
       width: pageWidth - 100,
     });

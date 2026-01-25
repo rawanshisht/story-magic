@@ -206,7 +206,7 @@ export default async function DashboardPage() {
               <BookOpen className="h-12 w-12 text-muted-foreground/50" />
               <h3 className="mt-4 font-semibold">No stories yet</h3>
               <p className="mb-4 text-sm text-muted-foreground">
-                Create your first personalized storybook
+                Create your first personalized story
               </p>
               <Link href="/create">
                 <Button>

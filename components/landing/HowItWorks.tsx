@@ -36,7 +36,7 @@ export function HowItWorks() {
             How It Works
           </h2>
           <p className="text-muted-foreground">
-            Create a personalized storybook in just a few simple steps
+            Create a personalized story in just a few simple steps
           </p>
         </div>
 

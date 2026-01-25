@@ -189,7 +189,7 @@ export default function CreateStoryPage() {
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-black text-primary tracking-tight">Create Magic!</h1>
         <p className="text-xl text-muted-foreground font-medium">
-          Follow the path to build your very own storybook
+          Follow the path to build your very own story
         </p>
       </div>
 

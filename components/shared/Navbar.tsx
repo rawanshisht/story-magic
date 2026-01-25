@@ -27,7 +27,7 @@ export function Navbar() {
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
               <BookOpen className="h-6 w-6" />
             </div>
-            <span className="text-2xl font-extrabold text-primary tracking-tight">StoryBook</span>
+            <span className="text-2xl font-extrabold text-primary tracking-tight">Story Magic</span>
           </Link>
           <div className="flex items-center space-x-4">
             <div className="h-10 w-24 bg-muted animate-pulse rounded-md" />
@@ -44,13 +44,13 @@ export function Navbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b-2 border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60" role="navigation" aria-label="Main navigation">
+    <nav role="navigation" aria-label="Main navigation" className="sticky top-0 z-50 w-full border-b-2 border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-20 items-center justify-between">
         <Link href="/" className="flex items-center space-x-3 transition-transform hover:scale-105">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
             <BookOpen className="h-6 w-6" />
           </div>
-          <span className="text-2xl font-extrabold text-primary tracking-tight">StoryBook</span>
+          <span className="text-2xl font-extrabold text-primary tracking-tight">Story Magic</span>
         </Link>
 
         <div className="flex items-center space-x-4">

@@ -11,9 +11,9 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: "StoryBook - Personalized Children's Stories",
+  title: "Story Magic - Personalized Children's Stories",
   description:
-    "Create magical, AI-generated storybooks featuring your child as the hero. Personalized stories with beautiful illustrations and meaningful morals.",
+    "Create magical, AI-generated stories featuring your child as the hero. Personalized tales with beautiful illustrations and meaningful morals.",
   keywords: [
     "children's stories",
     "personalized books",
@@ -21,6 +21,9 @@ export const metadata: Metadata = {
     "kids books",
     "bedtime stories",
   ],
+  icons: {
+    icon: "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪄</text></svg>",
+  },
 };
 
 export default function RootLayout({

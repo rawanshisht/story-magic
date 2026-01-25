@@ -10,7 +10,7 @@ export function Footer() {
           <div className="md:col-span-2">
             <Link href="/" className="flex items-center space-x-2">
               <BookOpen className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold">StoryBook</span>
+              <span className="text-xl font-bold">Story Magic</span>
             </Link>
             <p className="mt-4 max-w-xs text-sm text-muted-foreground">
               Creating magical, personalized stories for children with
@@ -60,7 +60,7 @@ export function Footer() {
 
         <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
           <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} StoryBook. All rights reserved.
+            &copy; {new Date().getFullYear()} Story Magic. All rights reserved.
           </p>
           <p className="text-sm text-muted-foreground">
             Made with love for families everywhere
