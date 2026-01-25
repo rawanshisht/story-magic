@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthenticatedUserId } from "@/lib/auth-helper";
 import prisma from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const session = await auth();
+    const userId = await getAuthenticatedUserId();
 
-    if (!session?.user?.id) {
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const children = await prisma.child.findMany({
-      where: { userId: session.user.id },
+      where: { userId },
       orderBy: { createdAt: "desc" },
     });
 
@@ -27,9 +27,9 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const session = await auth();
+    const userId = await getAuthenticatedUserId();
 
-    if (!session?.user?.id) {
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
         hairColor,
         hairStyle: hairStyle || null,
         interests: interests || [],
-        userId: session.user.id,
+        userId,
       },
     });
 

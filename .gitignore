@@ -45,3 +45,6 @@ next-env.d.ts
 
 # Generated images for manual review
 /generated-images-review/
+
+# clerk configuration (can include secrets)
+/.clerk/

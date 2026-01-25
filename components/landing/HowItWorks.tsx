@@ -44,11 +44,9 @@ export function HowItWorks() {
           {steps.map((step, index) => (
             <div key={step.title} className="relative">
               {/* Connector line */}
-              {index < steps.length - 1 && (
-                <div className="absolute right-0 top-8 hidden h-0.5 w-full bg-border lg:block" />
-              )}
+              <div className="absolute right-0 top-8 h-0.5 w-full bg-border hidden md:block" />
 
-              <div className="relative flex flex-col items-center text-center">
+              <div className="relative flex flex-col items-center text-center border-b-2 border-border/50 pb-6 md:border-b-0">
                 <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
                   <step.icon className="h-8 w-8" />
                 </div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,70 +25,68 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, ArrowRight, Sparkles, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, Sparkles, Check, Plus } from "lucide-react";
 import { Child } from "@/types";
+import { cn } from "@/lib/utils";
 
 const STEPS = [
-  { id: "child", title: "Select Child", description: "Choose or add a child" },
-  { id: "moral", title: "Choose Moral", description: "Pick a life lesson" },
+  { id: "child", title: "Who is the Hero?", description: "Choose who the story is about" },
+  { id: "moral", title: "The Lesson", description: "Pick a special life lesson" },
   {
     id: "customize",
-    title: "Customize",
-    description: "Optional story settings",
+    title: "The Setting",
+    description: "Where does the magic happen?",
   },
-  { id: "generate", title: "Generate", description: "Create your story" },
+  { id: "generate", title: "Ready!", description: "Create your magical story" },
 ];
 
 export default function CreateStoryPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const [currentStep, setCurrentStep] = useState(0);
-  const [children, setChildren] = useState<Child[]>([]);
   const [selectedChildId, setSelectedChildId] = useState<string>("");
   const [selectedMoral, setSelectedMoral] = useState<string>("");
   const [customSetting, setCustomSetting] = useState<string>("");
   const [customTheme, setCustomTheme] = useState<string>("");
   const [pageCount, setPageCount] = useState<number | undefined>(undefined);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
   const [showNewChildForm, setShowNewChildForm] = useState(false);
 
-  // Load children on mount
-  useEffect(() => {
-    async function loadChildren() {
-      try {
-        const response = await fetch("/api/children");
-        if (response.ok) {
-          const data = await response.json();
-          setChildren(data);
-
-          // Check for childId in URL
-          const childIdParam = searchParams?.get("childId");
-          if (childIdParam) {
-            setSelectedChildId(childIdParam);
-          }
-        }
-      } catch (error) {
-        console.error("Error loading children:", error);
+  // Fetch children
+  const { data: children = [], isLoading: isLoadingChildren } = useQuery<Child[]>({
+    queryKey: ["children"],
+    queryFn: async () => {
+      const response = await fetch("/api/children");
+      if (!response.ok) {
+        throw new Error("Failed to fetch children");
       }
-    }
-    loadChildren();
-  }, [searchParams]);
+      return response.json();
+    },
+    retry: 1,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
 
-  const handleCreateChild = async (formData: {
-    name: string;
-    age: string;
-    gender: string;
-    skinTone: string;
-    eyeColor: string;
-    hairColor: string;
-    hairStyle: string;
-    interests: string;
-  }) => {
-    setIsLoading(true);
-    try {
+  // Handle URL param selection
+  useEffect(() => {
+    const childIdParam = searchParams?.get("childId");
+    if (childIdParam && children.length > 0) {
+      setSelectedChildId(childIdParam);
+    }
+  }, [searchParams, children]);
+
+  const createChildMutation = useMutation({
+    mutationFn: async (formData: {
+      name: string;
+      age: string;
+      gender: string;
+      skinTone: string;
+      eyeColor: string;
+      hairColor: string;
+      hairStyle: string;
+      interests: string;
+    }) => {
       const response = await fetch("/api/children", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -104,40 +103,35 @@ export default function CreateStoryPage() {
       if (!response.ok) {
         throw new Error("Failed to create child profile");
       }
-
-      const newChild = await response.json();
-      setChildren((prev) => [...prev, newChild]);
+      return response.json();
+    },
+    onSuccess: (newChild) => {
+      queryClient.setQueryData(["children"], (old: Child[] = []) => [
+        ...old,
+        newChild,
+      ]);
       setSelectedChildId(newChild.id);
       setShowNewChildForm(false);
-
       toast({
         title: "Success",
         description: "Child profile created!",
       });
-    } catch (error) {
+    },
+    onError: () => {
       toast({
         title: "Error",
         description: "Failed to create child profile",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+  });
 
-  const handleGenerate = async () => {
-    if (!selectedChildId || !selectedMoral) {
-      toast({
-        title: "Error",
-        description: "Please select a child and moral",
-        variant: "destructive",
-      });
-      return;
-    }
+  const generateStoryMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedChildId || !selectedMoral) {
+        throw new Error("Please select a child and moral");
+      }
 
-    setIsGenerating(true);
-
-    try {
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -155,24 +149,24 @@ export default function CreateStoryPage() {
         throw new Error(error.error || "Failed to generate story");
       }
 
-      const story = await response.json();
-
+      return response.json();
+    },
+    onSuccess: (story) => {
       toast({
         title: "Story Created & Saved!",
         description: "Your personalized story has been saved to your account",
       });
-
       router.push(`/stories/${story.id}`);
-    } catch (error) {
+    },
+    onError: (error) => {
       toast({
         title: "Error",
         description:
           error instanceof Error ? error.message : "Failed to generate story",
         variant: "destructive",
       });
-      setIsGenerating(false);
-    }
-  };
+    },
+  });
 
   const canProceed = () => {
     switch (currentStep) {
@@ -190,108 +184,118 @@ export default function CreateStoryPage() {
   const progress = ((currentStep + 1) / STEPS.length) * 100;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
+    <div className="mx-auto max-w-4xl space-y-10 py-6">
       {/* Progress Header */}
-      <div>
-        <h1 className="text-3xl font-bold">Create a New Story</h1>
-        <p className="text-muted-foreground">
-          Follow the steps to create a personalized story
+      <div className="text-center space-y-4">
+        <h1 className="text-4xl font-black text-primary tracking-tight">Create Magic!</h1>
+        <p className="text-xl text-muted-foreground font-medium">
+          Follow the path to build your very own storybook
         </p>
       </div>
 
-      <Progress value={progress} className="h-2" />
-
-      {/* Step Indicators */}
-      <div className="flex justify-between">
-        {STEPS.map((step, index) => (
-          <div
-            key={step.id}
-            className={`flex items-center gap-2 ${
-              index <= currentStep
-                ? "text-primary"
-                : "text-muted-foreground"
-            }`}
-          >
-            <div
-              className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${
-                index < currentStep
-                  ? "bg-primary text-primary-foreground"
-                  : index === currentStep
-                    ? "border-2 border-primary"
-                    : "border-2 border-muted"
-              }`}
-            >
-              {index < currentStep ? (
-                <Check className="h-4 w-4" />
-              ) : (
-                index + 1
-              )}
+      {/* Playful Progress Path */}
+      <div className="relative px-4">
+        <div className="absolute top-1/2 left-0 w-full h-1 bg-muted -translate-y-1/2 rounded-full" />
+        <div 
+          className="absolute top-1/2 left-0 h-1 bg-primary -translate-y-1/2 transition-all duration-500 rounded-full"
+          style={{ width: `${progress}%` }}
+        />
+        <div className="relative flex justify-between items-center">
+          {STEPS.map((step, index) => (
+            <div key={step.id} className="flex flex-col items-center gap-2">
+              <div
+                className={cn(
+                  "flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold transition-all border-4",
+                  index < currentStep
+                    ? "bg-primary border-primary text-primary-foreground scale-110"
+                    : index === currentStep
+                      ? "bg-background border-primary text-primary scale-125 shadow-lg ring-4 ring-primary/20"
+                      : "bg-background border-muted text-muted-foreground"
+                )}
+              >
+                {index < currentStep ? (
+                  <Check className="h-6 w-6" strokeWidth={3} />
+                ) : (
+                  index + 1
+                )}
+              </div>
+              <span className={cn(
+                "hidden sm:block text-sm font-bold",
+                index <= currentStep ? "text-primary" : "text-muted-foreground"
+              )}>
+                {step.title}
+              </span>
             </div>
-            <div className="hidden sm:block">
-              <p className="text-sm font-medium">{step.title}</p>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {/* Step Content */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{STEPS[currentStep].title}</CardTitle>
-          <CardDescription>{STEPS[currentStep].description}</CardDescription>
+      <Card className="border-4 border-primary/10 shadow-xl rounded-3xl overflow-hidden">
+        <CardHeader className="bg-primary/5 border-b-2 border-primary/10 py-8">
+          <CardTitle className="text-3xl font-bold text-center">{STEPS[currentStep].title}</CardTitle>
+          <CardDescription className="text-center text-lg">{STEPS[currentStep].description}</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-8">
           {/* Step 1: Select Child */}
           {currentStep === 0 && (
-            <div className="space-y-6">
+            <div className="space-y-8">
               {!showNewChildForm ? (
                 <>
                   {children.length > 0 && (
-                    <div className="space-y-2">
-                      <Label>Select a Child</Label>
-                      <Select
-                        value={selectedChildId}
-                        onValueChange={setSelectedChildId}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Choose a child" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {children.map((child) => (
-                            <SelectItem key={child.id} value={child.id}>
-                              {child.name} ({child.age} years old)
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {children.map((child) => (
+                        <Card 
+                          key={child.id}
+                          className={cn(
+                            "cursor-pointer p-6 transition-all hover:scale-105 border-2",
+                            selectedChildId === child.id 
+                              ? "border-primary bg-primary/5 ring-4 ring-primary/10" 
+                              : "border-muted hover:border-primary/50"
+                          )}
+                          onClick={() => setSelectedChildId(child.id)}
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="h-14 w-14 rounded-full bg-secondary flex items-center justify-center text-2xl">
+                              👶
+                            </div>
+                            <div>
+                              <h4 className="font-bold text-xl">{child.name}</h4>
+                              <p className="text-muted-foreground">{child.age} years old</p>
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
                     </div>
                   )}
 
-                  <div className="text-center">
-                    {children.length > 0 && (
-                      <p className="mb-2 text-sm text-muted-foreground">or</p>
-                    )}
+                  <div className="text-center pt-4">
                     <Button
                       variant={children.length === 0 ? "default" : "outline"}
+                      size="lg"
+                      className="rounded-full px-8 font-bold text-lg h-14"
                       onClick={() => setShowNewChildForm(true)}
                     >
-                      Add New Child
+                      <Plus className="mr-2 h-6 w-6" />
+                      Add a New Hero
                     </Button>
                   </div>
                 </>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <Button
                     variant="ghost"
-                    size="sm"
                     onClick={() => setShowNewChildForm(false)}
+                    className="font-bold"
                   >
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back to selection
                   </Button>
                   <ChildDetailsForm
-                    onSubmit={handleCreateChild}
-                    isLoading={isLoading}
+                    onSubmit={async (data) => {
+                      await createChildMutation.mutateAsync(data);
+                    }}
+                    isLoading={createChildMutation.isPending}
                   />
                 </div>
               )}
@@ -308,114 +312,118 @@ export default function CreateStoryPage() {
 
           {/* Step 3: Customize */}
           {currentStep === 2 && (
-            <div className="space-y-6">
-              <p className="text-sm text-muted-foreground">
-                These settings are optional. Leave blank for AI to choose.
-              </p>
-
-              <div className="space-y-2">
-                <Label htmlFor="setting">Story Setting</Label>
-                <Input
-                  id="setting"
-                  placeholder="e.g., a magical forest, outer space, underwater kingdom"
-                  value={customSetting}
-                  onChange={(e) => setCustomSetting(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="theme">Story Theme</Label>
-                <Input
-                  id="theme"
-                  placeholder="e.g., adventure, mystery, fantasy"
-                  value={customTheme}
-                  onChange={(e) => setCustomTheme(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="pageCount">Number of Pages (Optional)</Label>
-                <Input
-                  id="pageCount"
-                  type="number"
-                  min={4}
-                  max={16}
-                  placeholder="Leave empty for age-appropriate default"
-                  value={pageCount ?? ""}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value === "") {
-                      setPageCount(undefined);
-                    } else {
-                      const num = parseInt(value);
-                      if (!isNaN(num) && num >= 4 && num <= 16) {
-                        setPageCount(num);
-                      }
-                    }
-                  }}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Choose between 4-16 pages, or leave empty for age-appropriate default
+            <div className="space-y-8">
+              <div className="bg-blue-50 p-6 rounded-2xl border-2 border-blue-100 flex items-start gap-4">
+                <div className="h-10 w-10 shrink-0 bg-blue-100 rounded-full flex items-center justify-center text-xl">
+                  ✨
+                </div>
+                <p className="text-blue-700 font-medium">
+                  These are extra magical touches! You can leave them empty and the AI fairies will choose for you.
                 </p>
+              </div>
+
+              <div className="grid gap-8 md:grid-cols-2">
+                <div className="space-y-3">
+                  <Label htmlFor="setting" className="text-lg font-bold">Story Setting</Label>
+                  <Input
+                    id="setting"
+                    className="h-14 text-lg rounded-xl border-2 focus:ring-4 focus:ring-primary/10"
+                    placeholder="e.g. a candy castle, outer space..."
+                    value={customSetting}
+                    onChange={(e) => setCustomSetting(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label htmlFor="theme" className="text-lg font-bold">Story Style</Label>
+                  <Input
+                    id="theme"
+                    className="h-14 text-lg rounded-xl border-2 focus:ring-4 focus:ring-primary/10"
+                    placeholder="e.g. funny adventure, spooky mystery..."
+                    value={customTheme}
+                    onChange={(e) => setCustomTheme(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-3 max-w-sm">
+                <Label htmlFor="pageCount" className="text-lg font-bold">How long is the story?</Label>
+                <div className="flex items-center gap-4">
+                  <Input
+                    id="pageCount"
+                    type="number"
+                    min={4}
+                    max={16}
+                    className="h-14 text-lg rounded-xl border-2 focus:ring-4 focus:ring-primary/10"
+                    placeholder="Auto"
+                    value={pageCount ?? ""}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === "") setPageCount(undefined);
+                      else {
+                        const num = parseInt(value);
+                        if (!isNaN(num) && num >= 4 && num <= 16) setPageCount(num);
+                      }
+                    }}
+                  />
+                  <span className="text-muted-foreground font-bold whitespace-nowrap">Pages (4-16)</span>
+                </div>
               </div>
             </div>
           )}
 
           {/* Step 4: Generate */}
           {currentStep === 3 && (
-            <div className="space-y-6 text-center">
-              {isGenerating ? (
-                <div className="py-12">
-                  <LoadingSpinner
-                    size="lg"
-                    text="Creating your magical story..."
-                  />
-                  <p className="mt-4 text-sm text-muted-foreground">
-                    This may take a minute while we generate the story and
-                    illustrations
+            <div className="space-y-8 text-center">
+              {generateStoryMutation.isPending ? (
+                <div className="py-12 space-y-6">
+                  <div className="flex justify-center">
+                    <div className="relative">
+                      <div className="h-32 w-32 border-8 border-primary/20 border-t-primary rounded-full animate-spin" />
+                      <div className="absolute inset-0 flex items-center justify-center text-4xl">
+                        🪄
+                      </div>
+                    </div>
+                  </div>
+                  <h3 className="text-3xl font-black text-primary animate-pulse">Mixing the Magic...</h3>
+                  <p className="text-xl text-muted-foreground font-medium">
+                    Our story fairies are painting the pictures and writing the words!
                   </p>
                 </div>
               ) : (
                 <>
-                  <div className="rounded-lg bg-muted p-6">
-                    <h3 className="mb-4 font-semibold">Story Summary</h3>
-                    <div className="space-y-2 text-sm">
-                      <p>
-                        <span className="text-muted-foreground">For:</span>{" "}
-                        {children.find((c) => c.id === selectedChildId)?.name}
-                      </p>
-                      <p>
-                        <span className="text-muted-foreground">Moral:</span>{" "}
-                        {selectedMoral}
-                      </p>
-                      {customSetting && (
-                        <p>
-                          <span className="text-muted-foreground">Setting:</span>{" "}
-                          {customSetting}
-                        </p>
-                      )}
-                      {customTheme && (
-                        <p>
-                          <span className="text-muted-foreground">Theme:</span>{" "}
-                          {customTheme}
-                        </p>
-                      )}
-                      {pageCount && (
-                        <p>
-                          <span className="text-muted-foreground">Pages:</span>{" "}
-                          {pageCount}
-                        </p>
-                      )}
+                  <div className="rounded-3xl bg-secondary/30 p-8 border-4 border-dashed border-secondary/50">
+                    <h3 className="text-2xl font-black mb-6 flex items-center justify-center gap-2">
+                      <Sparkles className="text-accent h-6 w-6" />
+                      Your Adventure Plan
+                    </h3>
+                    <div className="grid gap-4 sm:grid-cols-2 text-left">
+                      <div className="bg-white p-4 rounded-2xl shadow-sm">
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Hero</p>
+                        <p className="text-xl font-bold">{children.find((c) => c.id === selectedChildId)?.name}</p>
+                      </div>
+                      <div className="bg-white p-4 rounded-2xl shadow-sm">
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Lesson</p>
+                        <p className="text-xl font-bold">{selectedMoral}</p>
+                      </div>
+                      <div className="bg-white p-4 rounded-2xl shadow-sm">
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Where</p>
+                        <p className="text-xl font-bold">{customSetting || "Surprise Me!"}</p>
+                      </div>
+                      <div className="bg-white p-4 rounded-2xl shadow-sm">
+                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Style</p>
+                        <p className="text-xl font-bold">{customTheme || "Surprise Me!"}</p>
+                      </div>
                     </div>
                   </div>
 
                   <Button
                     size="lg"
-                    onClick={handleGenerate}
-                    className="w-full"
+                    onClick={() => generateStoryMutation.mutate()}
+                    className="w-full h-20 text-2xl font-black rounded-3xl shadow-lg transition-transform hover:scale-105 active:scale-95"
                   >
-                    <Sparkles className="mr-2 h-5 w-5" />
-                    Generate Story
+                    <Sparkles className="mr-3 h-8 w-8" />
+                    CREATE THE MAGIC!
                   </Button>
                 </>
               )}
@@ -425,24 +433,28 @@ export default function CreateStoryPage() {
       </Card>
 
       {/* Navigation Buttons */}
-      {!isGenerating && (
-        <div className="flex justify-between">
+      {!generateStoryMutation.isPending && (
+        <div className="flex justify-between items-center px-4">
           <Button
-            variant="outline"
+            variant="ghost"
+            size="lg"
+            className="font-bold text-lg hover:bg-muted rounded-full"
             onClick={() => setCurrentStep((prev) => prev - 1)}
             disabled={currentStep === 0}
           >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Previous
+            <ArrowLeft className="mr-2 h-6 w-6" />
+            Go Back
           </Button>
 
           {currentStep < STEPS.length - 1 && (
             <Button
+              size="lg"
+              className="font-bold text-lg rounded-full px-10 h-14 shadow-md"
               onClick={() => setCurrentStep((prev) => prev + 1)}
               disabled={!canProceed()}
             >
-              Next
-              <ArrowRight className="ml-2 h-4 w-4" />
+              Keep Going!
+              <ArrowRight className="ml-2 h-6 w-6" />
             </Button>
           )}
         </div>

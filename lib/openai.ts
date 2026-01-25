@@ -109,9 +109,23 @@ export async function downloadImageAsBase64(url: string): Promise<string> {
   }
 }
 
+/**
+ * Generate speech from text using OpenAI TTS-1 model
+ */
+export async function generateSpeech(input: string): Promise<ArrayBuffer> {
+  const mp3 = await openai.audio.speech.create({
+    model: "tts-1",
+    voice: "marin",
+    input: input,
+    speed: 0.85,
+  });
+
+  return await mp3.arrayBuffer();
+}
+
 export async function generateStoryText(prompt: string): Promise<string> {
   const response = await openai.chat.completions.create({
-    model: "gpt-4-turbo-preview",
+    model: "gpt-4o-mini",
     messages: [
       {
         role: "system",
@@ -123,8 +137,7 @@ export async function generateStoryText(prompt: string): Promise<string> {
         content: prompt,
       },
     ],
-    temperature: 0.8,
-    max_tokens: 4000,
+    max_completion_tokens: 2000,
   });
 
   return response.choices[0]?.message?.content || "";
@@ -135,40 +148,24 @@ export async function generateIllustration(prompt: string): Promise<string> {
   console.log(`[OpenAI Image] Starting generation with prompt: ${truncatedPrompt}`);
 
   try {
-    // GPT Image models (gpt-image-1, gpt-image-1-mini) return b64_json by default
-    // They do NOT support response_format parameter - that's only for DALL-E 2
-    // Use output_format for GPT models to specify png/jpeg/webp
-    const requestParams = {
-      model: "gpt-image-1-mini" as const,
-      prompt: `Create a children's book illustration. CRITICAL: Follow the exact character design and art style specifications provided. Maintain consistency with other pages in this book series.
+    const response = await openai.images.generate({
+      model: "gpt-image-1",
+      prompt: `Children's book watercolor illustration. NO TEXT OR WORDS anywhere in the image. Soft brushstrokes, delicate watercolor style.
 
 ${prompt}
 
-Technical requirements: Safe for children, no scary elements, bright cheerful colors, professional children's book illustration quality.`,
+IMPORTANT: Do not include any text, letters, words, or writing in the image.`,
       n: 1,
-      size: "1024x1024" as const,
-      quality: "medium" as const,
-      output_format: "png" as const,  // GPT models use output_format, not response_format
-    };
-
-    console.log(`[OpenAI Image] Request params: model=${requestParams.model}, size=${requestParams.size}, quality=${requestParams.quality}, output_format=${requestParams.output_format}`);
-
-    const response = await openai.images.generate(requestParams);
+      size: "1024x1024",
+      quality: "medium",
+      output_format: "png",
+    });
 
     console.log(`[OpenAI Image] Response received:`, JSON.stringify({
       hasData: !!response.data,
       dataLength: response.data?.length,
-      firstItem: response.data?.[0] ? {
-        hasUrl: !!response.data[0].url,
-        urlLength: response.data[0].url?.length,
-        urlStart: response.data[0].url?.slice(0, 50),
-        hasB64: !!response.data[0].b64_json,
-        b64Length: response.data[0].b64_json?.length,
-        revisedPrompt: response.data[0].revised_prompt?.slice(0, 50),
-      } : null,
     }, null, 2));
 
-    // GPT Image models return b64_json, not URL
     const b64 = response.data?.[0]?.b64_json;
     const url = response.data?.[0]?.url;
 
@@ -176,19 +173,16 @@ Technical requirements: Safe for children, no scary elements, bright cheerful co
       console.log(`[OpenAI Image] Received base64 data (length: ${b64.length})`);
       return `data:image/png;base64,${b64}`;
     } else if (url) {
-      // Fallback for DALL-E models or if API behavior changes
-      console.log(`[OpenAI Image] Received URL (length: ${url.length})`);
+      console.log(`[OpenAI Image] Received URL`);
       return url;
     } else {
-      console.error(`[OpenAI Image] No base64 or URL in response. Full response:`, JSON.stringify(response, null, 2));
+      console.error(`[OpenAI Image] No base64 or URL in response`);
       return "";
     }
   } catch (error) {
     console.error(`[OpenAI Image] Error generating image:`, error);
     if (error instanceof Error) {
-      console.error(`[OpenAI Image] Error name: ${error.name}`);
-      console.error(`[OpenAI Image] Error message: ${error.message}`);
-      console.error(`[OpenAI Image] Error stack:`, error.stack);
+      console.error(`[OpenAI Image] Error: ${error.message}`);
     }
     throw error;
   }

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthenticatedUserId } from "@/lib/auth-helper";
 import prisma from "@/lib/prisma";
 
 interface RouteParams {
@@ -8,17 +8,17 @@ interface RouteParams {
 
 export async function GET(request: Request, { params }: RouteParams) {
   try {
-    const session = await auth();
+    const userId = await getAuthenticatedUserId();
     const { id } = await params;
 
-    if (!session?.user?.id) {
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const child = await prisma.child.findUnique({
       where: {
         id: id,
-        userId: session.user.id,
+        userId: userId,
       },
     });
 
@@ -38,10 +38,10 @@ export async function GET(request: Request, { params }: RouteParams) {
 
 export async function PUT(request: Request, { params }: RouteParams) {
   try {
-    const session = await auth();
+    const userId = await getAuthenticatedUserId();
     const { id } = await params;
 
-    if (!session?.user?.id) {
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -50,7 +50,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
     const child = await prisma.child.update({
       where: {
         id: id,
-        userId: session.user.id,
+        userId: userId,
       },
       data: {
         name: body.name,
@@ -76,17 +76,17 @@ export async function PUT(request: Request, { params }: RouteParams) {
 
 export async function DELETE(request: Request, { params }: RouteParams) {
   try {
-    const session = await auth();
+    const userId = await getAuthenticatedUserId();
     const { id } = await params;
 
-    if (!session?.user?.id) {
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     await prisma.child.delete({
       where: {
         id: id,
-        userId: session.user.id,
+        userId: userId,
       },
     });
 

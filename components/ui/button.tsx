@@ -4,25 +4,26 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-full text-base font-bold ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-95 hover:scale-105",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        default: "bg-primary text-primary-foreground shadow-[0_4px_0_0_hsl(265_85%_55%)] hover:shadow-[0_6px_0_0_hsl(265_85%_55%)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-none",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+          "bg-destructive text-destructive-foreground shadow-[0_4px_0_0_hsl(340_85%_50%)] hover:shadow-[0_6px_0_0_hsl(340_85%_50%)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-none",
         outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+          "border-2 border-primary text-primary bg-background hover:bg-accent hover:text-accent-foreground shadow-sm hover:-translate-y-0.5 active:translate-y-0",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+          "bg-secondary text-secondary-foreground shadow-[0_4px_0_0_hsl(195_85%_50%)] hover:shadow-[0_6px_0_0_hsl(195_85%_50%)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-none",
+        ghost: "hover:bg-accent hover:text-accent-foreground hover:scale-105",
+        link: "text-primary underline-offset-4 hover:underline shadow-none hover:scale-100",
+        accent: "bg-accent text-accent-foreground shadow-[0_4px_0_0_hsl(45_95%_50%)] hover:shadow-[0_6px_0_0_hsl(45_95%_50%)] hover:-translate-y-0.5 active:translate-y-0 active:shadow-none",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
+        default: "h-12 px-6 py-3",
+        sm: "h-10 px-4 text-sm",
+        lg: "h-14 px-8 text-lg",
+        icon: "h-12 w-12",
       },
     },
     defaultVariants: {

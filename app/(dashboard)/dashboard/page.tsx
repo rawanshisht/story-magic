@@ -1,4 +1,5 @@
-import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import Image from "next/image";
 import prisma from "@/lib/prisma";
@@ -13,30 +14,48 @@ import {
 import { formatDate } from "@/lib/utils";
 import { Plus, BookOpen, User, Sparkles } from "lucide-react";
 import { Child, Story, StoryPage } from "@/types";
+import { getUserIdFromCookie } from "@/lib/firebase-admin";
+import { Navbar } from "@/components/shared/Navbar";
 
 export default async function DashboardPage() {
-  const session = await auth();
+  const cookieStore = await cookies();
+  const firebaseAuth = cookieStore.get("firebase-auth");
+  
+  if (!firebaseAuth) {
+    redirect("/login");
+  }
+
+  const userId = await getUserIdFromCookie(firebaseAuth.value);
+
+  if (!userId) {
+    redirect("/login");
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
 
   const [children, stories]: [Child[], Story[]] = await Promise.all([
     prisma.child.findMany({
-      where: { userId: session?.user?.id },
+      where: { userId: userId },
       orderBy: { createdAt: "desc" },
     }),
     prisma.story.findMany({
-      where: { userId: session?.user?.id },
+      where: { userId: userId },
       include: { child: true },
       orderBy: { createdAt: "desc" },
       take: 6,
     }),
   ]);
 
+  const userName = user?.name?.split(" ")[0] || user?.email?.split("@")[0] || "Parent";
+
   return (
     <div className="space-y-8">
-      {/* Welcome Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">
-            Welcome back, {session?.user?.name?.split(" ")[0] || "Parent"}!
+            Welcome back, {userName}!
           </h1>
           <p className="text-muted-foreground">
             Create magical stories for your children
@@ -50,7 +69,6 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -104,7 +122,6 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      {/* Children Section */}
       <div>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold">Your Children</h2>
@@ -171,7 +188,6 @@ export default async function DashboardPage() {
         )}
       </div>
 
-      {/* Recent Stories Section */}
       <div>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold">Recent Stories</h2>

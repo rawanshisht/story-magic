@@ -1,48 +1,66 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: hsl(0 0% 100%);
-  --color-foreground: hsl(222.2 84% 4.9%);
+  --font-sans: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
+
+  /* Magical Kids Palette */
+  --color-background: hsl(30 20% 98%); /* Paper White */
+  --color-foreground: hsl(225 40% 20%); /* Ink Blue */
+
   --color-card: hsl(0 0% 100%);
-  --color-card-foreground: hsl(222.2 84% 4.9%);
+  --color-card-foreground: hsl(225 40% 20%);
+
   --color-popover: hsl(0 0% 100%);
-  --color-popover-foreground: hsl(222.2 84% 4.9%);
-  --color-primary: hsl(262 83% 58%);
-  --color-primary-foreground: hsl(210 40% 98%);
-  --color-secondary: hsl(210 40% 96.1%);
-  --color-secondary-foreground: hsl(222.2 47.4% 11.2%);
-  --color-muted: hsl(210 40% 96.1%);
-  --color-muted-foreground: hsl(215.4 16.3% 46.9%);
-  --color-accent: hsl(210 40% 96.1%);
-  --color-accent-foreground: hsl(222.2 47.4% 11.2%);
-  --color-destructive: hsl(0 84.2% 60.2%);
-  --color-destructive-foreground: hsl(210 40% 98%);
-  --color-border: hsl(214.3 31.8% 91.4%);
-  --color-input: hsl(214.3 31.8% 91.4%);
-  --color-ring: hsl(262 83% 58%);
-  --radius: 0.75rem;
+  --color-popover-foreground: hsl(225 40% 20%);
+
+  /* Magical Purple */
+  --color-primary: hsl(265 85% 65%);
+  --color-primary-foreground: hsl(0 0% 100%);
+
+  /* Sky Blue */
+  --color-secondary: hsl(195 85% 60%);
+  --color-secondary-foreground: hsl(0 0% 100%);
+
+  /* Cloud Gray */
+  --color-muted: hsl(210 20% 95%);
+  --color-muted-foreground: hsl(215 20% 50%);
+
+  /* Sunshine Yellow */
+  --color-accent: hsl(45 95% 60%);
+  --color-accent-foreground: hsl(225 40% 20%);
+
+  /* Berry Red */
+  --color-destructive: hsl(340 85% 60%);
+  --color-destructive-foreground: hsl(0 0% 100%);
+
+  --color-border: hsl(265 30% 90%); /* Light Purple Border */
+  --color-input: hsl(265 30% 90%);
+  --color-ring: hsl(265 85% 65%);
+
+  --radius: 1.5rem; /* 24px - Large rounded corners */
 }
 
 .dark {
-  --color-background: hsl(222.2 84% 4.9%);
-  --color-foreground: hsl(210 40% 98%);
-  --color-card: hsl(222.2 84% 4.9%);
-  --color-card-foreground: hsl(210 40% 98%);
-  --color-popover: hsl(222.2 84% 4.9%);
-  --color-popover-foreground: hsl(210 40% 98%);
-  --color-primary: hsl(262 83% 58%);
-  --color-primary-foreground: hsl(222.2 47.4% 11.2%);
-  --color-secondary: hsl(217.2 32.6% 17.5%);
-  --color-secondary-foreground: hsl(210 40% 98%);
-  --color-muted: hsl(217.2 32.6% 17.5%);
-  --color-muted-foreground: hsl(215 20.2% 65.1%);
-  --color-accent: hsl(217.2 32.6% 17.5%);
-  --color-accent-foreground: hsl(210 40% 98%);
-  --color-destructive: hsl(0 62.8% 30.6%);
-  --color-destructive-foreground: hsl(210 40% 98%);
-  --color-border: hsl(217.2 32.6% 17.5%);
-  --color-input: hsl(217.2 32.6% 17.5%);
-  --color-ring: hsl(262 83% 58%);
+  /* Slightly darker for dark mode, but keeping it friendly */
+  --color-background: hsl(225 40% 10%);
+  --color-foreground: hsl(30 20% 98%);
+  --color-card: hsl(225 40% 15%);
+  --color-card-foreground: hsl(30 20% 98%);
+  --color-popover: hsl(225 40% 15%);
+  --color-popover-foreground: hsl(30 20% 98%);
+  --color-primary: hsl(265 85% 65%);
+  --color-primary-foreground: hsl(0 0% 100%);
+  --color-secondary: hsl(195 85% 60%);
+  --color-secondary-foreground: hsl(0 0% 100%);
+  --color-muted: hsl(225 30% 25%);
+  --color-muted-foreground: hsl(215 20% 65%);
+  --color-accent: hsl(45 95% 60%);
+  --color-accent-foreground: hsl(225 40% 20%);
+  --color-destructive: hsl(340 85% 60%);
+  --color-destructive-foreground: hsl(0 0% 100%);
+  --color-border: hsl(225 30% 25%);
+  --color-input: hsl(225 30% 25%);
+  --color-ring: hsl(265 85% 65%);
 }
 
 @layer base {
@@ -52,26 +70,33 @@
   body {
     @apply bg-background text-foreground;
   }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight text-foreground;
+  }
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl text-primary;
+  }
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - Fun & Round */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 12px;
+  height: 12px;
 }
 
 ::-webkit-scrollbar-track {
   background: hsl(var(--muted));
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.3);
-  border-radius: 4px;
+  background: hsl(var(--primary) / 0.5);
+  border-radius: 6px;
+  border: 3px solid hsl(var(--muted));
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.5);
+  background: hsl(var(--primary) / 0.8);
 }
 
 @utility container {
@@ -80,74 +105,113 @@
   max-width: 80rem; /* 7xl */
 }
 
-/* Gradient backgrounds */
+/* Gradient backgrounds - More Magical */
 .gradient-bg {
   background: radial-gradient(
     circle at 50% 0%,
-    hsl(262 83% 58% / 0.15) 0%,
-    hsl(330 81% 60% / 0.1) 30%,
-    transparent 70%
+    hsl(265 85% 65% / 0.15) 0%,
+    hsl(195 85% 60% / 0.1) 40%,
+    transparent 80%
   );
 }
 
 .hero-gradient {
   background: radial-gradient(
-    circle at 50% 50%,
-    hsl(262 83% 58% / 0.08) 0%,
-    hsl(210 40% 98% / 0) 70%
+    circle at 50% 40%,
+    hsl(265 85% 65% / 0.1) 0%,
+    hsl(45 95% 60% / 0.05) 30%,
+    hsl(195 85% 60% / 0.05) 60%,
+    transparent 80%
   );
   position: relative;
 }
 
+/* Polka dot pattern for texture */
 .hero-gradient::before {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(hsl(262 83% 58% / 0.1) 1px, transparent 1px);
-  background-size: 32px 32px;
-  mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+  background-image: radial-gradient(hsl(265 85% 65% / 0.15) 2px, transparent 2px);
+  background-size: 40px 40px;
+  mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
   pointer-events: none;
   z-index: -1;
 }
 
 /* Animation utilities */
 .animate-in {
-  animation: animate-in 0.5s ease-out;
+  animation: animate-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); /* Bouncy enter */
 }
 
 .animate-fade-in {
-  animation: fade-in 0.3s ease-out;
+  animation: fade-in 0.4s ease-out;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-bounce-hover {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.animate-bounce-hover:hover {
+  transform: scale(1.05);
+}
+.animate-bounce-hover:active {
+  transform: scale(0.95);
 }
 
 @keyframes animate-in {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(20px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
 @keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* Story book page effect */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Story book page effect - Enhanced */
 .book-page {
   background: linear-gradient(
     to right,
-    hsl(var(--card)) 0%,
-    hsl(var(--card)) 95%,
-    hsl(var(--muted)) 100%
+    hsl(0 0% 100%) 0%,
+    hsl(0 0% 100%) 95%,
+    hsl(0 0% 95%) 100%
   );
   box-shadow:
-    2px 0 5px rgba(0, 0, 0, 0.1),
-    inset -2px 0 5px rgba(0, 0, 0, 0.05);
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    inset -4px 0 8px rgba(0, 0, 0, 0.02); /* Inner spine shadow */
+  border-radius: 1.5rem; /* Matches --radius */
+  border: 2px solid hsl(var(--border));
+}
+
+/* Kids UI Specifics */
+.btn-bubble {
+  @apply rounded-full font-bold shadow-sm transition-all;
+  box-shadow: 0 4px 0 0 hsl(var(--primary) / 0.3);
+}
+.btn-bubble:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 0 hsl(var(--primary) / 0.3);
+}
+.btn-bubble:active {
+  transform: translateY(2px);
+  box-shadow: 0 0 0 0 hsl(var(--primary) / 0.3);
+}
+
+.card-kids {
+  @apply rounded-3xl border-2 border-border bg-card text-card-foreground shadow-sm;
 }

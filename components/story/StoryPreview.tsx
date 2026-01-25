@@ -8,6 +8,7 @@ import { ChevronLeft, ChevronRight, Download, Maximize2 } from "lucide-react";
 import { StoryPage } from "@/types";
 import { cn } from "@/lib/utils";
 import { ImageViewer } from "./ImageViewer";
+import { AudioPlayer } from "./AudioPlayer";
 
 interface StoryPreviewProps {
   title: string;
@@ -61,8 +62,13 @@ export function StoryPreview({ title, pages, storyId }: StoryPreviewProps) {
               </div>
             )}
           </div>
-          <div className="p-6">
+          <div className="p-6 space-y-4">
             <p className="text-lg leading-relaxed">{page?.text}</p>
+            {page?.text && (
+              <div className="flex justify-center pt-2">
+                <AudioPlayer text={page.text} />
+              </div>
+            )}
           </div>
         </Card>
 

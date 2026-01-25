@@ -19,9 +19,9 @@ export function Pricing() {
         <div className="mt-16 flex justify-center">
           <Card className="w-full max-w-md border-2 border-primary">
             <CardHeader className="text-center">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary">
-                <Sparkles className="h-6 w-6 text-primary-foreground" />
-              </div>
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary" role="img" aria-label="Free plan icon">
+            <Sparkles className="h-6 w-6 text-primary-foreground" />
+          </div>
               <CardTitle className="text-2xl">Free to Start</CardTitle>
               <div className="mt-4">
                 <span className="text-4xl font-bold">$0</span>

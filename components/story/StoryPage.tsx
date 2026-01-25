@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { StoryPage as StoryPageType } from "@/types";
+import { AudioPlayer } from "./AudioPlayer";
 
 interface StoryPageProps {
   page: StoryPageType;
@@ -34,8 +35,13 @@ export function StoryPage({ page, isActive }: StoryPageProps) {
           </div>
         )}
       </div>
-      <div className="p-8">
+      <div className="p-8 space-y-4">
         <p className="text-xl leading-relaxed text-center">{page.text}</p>
+        {page.text && (
+          <div className="flex justify-center">
+            <AudioPlayer text={page.text} />
+          </div>
+        )}
       </div>
     </Card>
   );

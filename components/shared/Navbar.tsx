@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useSession, signOut } from "next-auth/react";
+import { useAuth } from "@/context/AuthContext";
+import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,84 +12,117 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { BookOpen, User, LogOut, LayoutDashboard } from "lucide-react";
+import { BookOpen, User, LogOut, LayoutDashboard, Sparkles } from "lucide-react";
 import { getInitials } from "@/lib/utils";
 
 export function Navbar() {
-  const { data: session } = useSession();
+  const { user, loading, logout } = useAuth();
+  const [isPending, startTransition] = useTransition();
+
+  if (loading) {
+    return (
+      <nav className="sticky top-0 z-50 w-full border-b-2 border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60" role="navigation" aria-label="Main navigation">
+        <div className="container flex h-20 items-center justify-between">
+          <Link href="/" className="flex items-center space-x-3 transition-transform hover:scale-105">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
+              <BookOpen className="h-6 w-6" />
+            </div>
+            <span className="text-2xl font-extrabold text-primary tracking-tight">StoryBook</span>
+          </Link>
+          <div className="flex items-center space-x-4">
+            <div className="h-10 w-24 bg-muted animate-pulse rounded-md" />
+          </div>
+        </div>
+      </nav>
+    );
+  }
+
+  const handleLogout = () => {
+    startTransition(async () => {
+      await logout();
+    });
+  };
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
-        <Link href="/" className="flex items-center space-x-2">
-          <BookOpen className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold">StoryBook</span>
+    <nav className="sticky top-0 z-50 w-full border-b-2 border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60" role="navigation" aria-label="Main navigation">
+      <div className="container flex h-20 items-center justify-between">
+        <Link href="/" className="flex items-center space-x-3 transition-transform hover:scale-105">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
+            <BookOpen className="h-6 w-6" />
+          </div>
+          <span className="text-2xl font-extrabold text-primary tracking-tight">StoryBook</span>
         </Link>
 
         <div className="flex items-center space-x-4">
-          {session ? (
+          {user ? (
             <>
-              <Link href="/dashboard">
-                <Button variant="ghost" size="sm">
-                  <LayoutDashboard className="mr-2 h-4 w-4" />
-                  Dashboard
+              <Link href="/dashboard" className="hidden md:block">
+                <Button variant="ghost" size="lg" className="text-lg font-bold text-foreground">
+                  <LayoutDashboard className="mr-2 h-6 w-6 text-secondary" />
+                  My Dashboard
                 </Button>
               </Link>
-              <Link href="/stories">
-                <Button variant="ghost" size="sm">
-                  <BookOpen className="mr-2 h-4 w-4" />
-                  My Stories
+              <Link href="/stories" className="hidden md:block">
+                <Button variant="ghost" size="lg" className="text-lg font-bold text-foreground">
+                  <BookOpen className="mr-2 h-6 w-6 text-accent" />
+                  Stories
+                </Button>
+              </Link>
+              <Link href="/create">
+                <Button variant="accent" size="lg" className="font-bold">
+                  <Sparkles className="mr-2 h-5 w-5" />
+                  Create!
                 </Button>
               </Link>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="relative h-10 w-10 rounded-full"
+                    className="relative h-12 w-12 rounded-full ring-2 ring-primary/20 hover:ring-primary"
                   >
                     <Avatar className="h-10 w-10">
                       <AvatarImage
-                        src={session.user?.image || ""}
-                        alt={session.user?.name || ""}
+                        src={user.photoURL || ""}
+                        alt={user.displayName || ""}
                       />
-                      <AvatarFallback>
-                        {getInitials(session.user?.name || "U")}
+                      <AvatarFallback className="bg-secondary text-secondary-foreground font-bold text-lg">
+                        {getInitials(user.displayName || "U")}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuContent className="w-56 rounded-2xl border-2 p-2" align="end" forceMount>
                   <div className="flex items-center justify-start gap-2 p-2">
                     <div className="flex flex-col space-y-1 leading-none">
-                      {session.user?.name && (
-                        <p className="font-medium">{session.user.name}</p>
+                      {user.displayName && (
+                        <p className="font-bold text-lg text-primary">{user.displayName}</p>
                       )}
-                      {session.user?.email && (
+                      {user.email && (
                         <p className="w-[200px] truncate text-sm text-muted-foreground">
-                          {session.user.email}
+                          {user.email}
                         </p>
                       )}
                     </div>
                   </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard">
-                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                  <DropdownMenuSeparator className="bg-border" />
+                  <DropdownMenuItem asChild className="rounded-xl cursor-pointer">
+                    <Link href="/dashboard" className="w-full font-bold">
+                      <LayoutDashboard className="mr-2 h-5 w-5 text-secondary" />
                       Dashboard
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/stories">
-                      <BookOpen className="mr-2 h-4 w-4" />
+                  <DropdownMenuItem asChild className="rounded-xl cursor-pointer">
+                    <Link href="/stories" className="w-full font-bold">
+                      <BookOpen className="mr-2 h-5 w-5 text-accent" />
                       My Stories
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
+                  <DropdownMenuSeparator className="bg-border" />
                   <DropdownMenuItem
-                    className="cursor-pointer text-red-600"
-                    onClick={() => signOut({ callbackUrl: "/" })}
+                    className="cursor-pointer text-destructive rounded-xl font-bold focus:text-destructive"
+                    onClick={handleLogout}
                   >
-                    <LogOut className="mr-2 h-4 w-4" />
+                    <LogOut className="mr-2 h-5 w-5" />
                     Sign out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -97,12 +131,12 @@ export function Navbar() {
           ) : (
             <>
               <Link href="/login">
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="lg" className="text-lg font-bold">
                   Sign in
                 </Button>
               </Link>
               <Link href="/register">
-                <Button size="sm">Get Started</Button>
+                <Button size="lg" variant="default" className="text-lg">Get Started</Button>
               </Link>
             </>
           )}

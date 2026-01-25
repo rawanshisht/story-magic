@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthenticatedUserId } from "@/lib/auth-helper";
 import prisma from "@/lib/prisma";
 import { generateStory } from "@/lib/story-generator";
 import { Child } from "@/types";
 
 export async function POST(request: Request) {
   try {
-    const session = await auth();
+    const userId = await getAuthenticatedUserId();
 
-    if (!session?.user?.id) {
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -22,7 +22,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validate pageCount if provided
     if (pageCount !== undefined && (pageCount < 4 || pageCount > 16)) {
       return NextResponse.json(
         { error: "Page count must be between 4 and 16" },
@@ -30,11 +29,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // Fetch child data
     const childData = await prisma.child.findUnique({
       where: {
         id: childId,
-        userId: session.user.id,
+        userId: userId,
       },
     });
 
@@ -42,7 +40,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Child not found" }, { status: 404 });
     }
 
-    // Convert Prisma model to our Child type
     const child: Child = {
       id: childData.id,
       name: childData.name,
@@ -57,7 +54,6 @@ export async function POST(request: Request) {
       createdAt: childData.createdAt,
     };
 
-    // Generate the story
     const generatedStory = await generateStory(
       child,
       moral,
@@ -66,14 +62,13 @@ export async function POST(request: Request) {
       pageCount
     );
 
-    // Save to database
     const story = await prisma.story.create({
       data: {
         title: generatedStory.title,
         moral,
         content: JSON.parse(JSON.stringify(generatedStory.pages)),
         childId,
-        userId: session.user.id,
+        userId: userId,
         pageCount: generatedStory.pages.length,
       },
       include: { child: true },

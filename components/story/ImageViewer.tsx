@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Download, X, Maximize2 } from "lucide-react";
 import { StoryPage } from "@/types";
 import { cn } from "@/lib/utils";
+import { AudioPlayer } from "./AudioPlayer";
 
 interface ImageViewerProps {
   pages: StoryPage[];
@@ -191,8 +192,13 @@ export function ImageViewer({
 
         {/* Text */}
         <div className="w-full max-w-3xl mt-6">
-          <div className="bg-muted/20 rounded-lg p-6 text-center">
+          <div className="bg-muted/20 rounded-lg p-6 text-center space-y-4">
             <p className="text-xl leading-relaxed">{currentPage?.text}</p>
+            {currentPage?.text && (
+              <div className="flex justify-center">
+                <AudioPlayer text={currentPage.text} />
+              </div>
+            )}
           </div>
         </div>
       </div>

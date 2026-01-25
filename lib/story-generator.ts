@@ -81,31 +81,32 @@ function buildCharacterReference(child: Child): string {
     ? `${child.hairColor} ${child.hairStyle} hair`
     : `${child.hairColor} hair`;
 
-  return `CHARACTER DESIGN REFERENCE (maintain exact consistency across all pages):
-- Character: Young ${genderTerm} named ${child.name}, approximately ${child.age} years old
-- Face: Round, friendly face with ${child.eyeColor} eyes, button nose, warm smile
-- Skin: ${child.skinTone} skin tone (maintain exact same shade throughout)
-- Hair: ${hairDescription} (keep exact same style and color in every image)
-- Build: Age-appropriate child proportions
-- Expression: Generally happy and engaged
-- Clothing: Simple, colorful outfit (keep the SAME outfit in all images - pick one and stick with it)`;
+  return `CHARACTER CONSISTENCY - MUST FOLLOW EXACTLY IN ALL PAGES:
+Main Character: ${child.name}, a ${child.age}-year-old ${genderTerm}
+- Face: ${child.skinTone} skin, ${child.eyeColor} eyes, button nose, warm friendly smile
+- Hair: ${hairDescription} (exact same style and color in EVERY image)
+- Body: Same proportions in every image
+- Outfit: ${child.gender === "female" ? "dress" : "shirt and pants"} (exact same outfit in every image - SAME colors, SAME design)
+- Expression: Always happy and engaged, same expression style
+
+CRITICAL: The character MUST look like the same person in every single page with the exact same clothes.`;
 }
 
-// Define a consistent art style for the entire story
+// Define a consistent art style for the entire story - WATERCOLOR STYLE
 function buildStyleReference(): string {
-  return `ART STYLE (use this EXACT style for all pages):
-- Style: Warm, friendly children's book illustration, Pixar/Disney inspired
-- Rendering: Soft digital painting with gentle gradients, high-quality finish
-- Color Palette: Warm and inviting - soft golden yellows (#F5D76E), gentle sky blues (#7EC8E3), warm coral oranges (#F7971E), soft mint greens (#88D8B0), and creamy whites (#FFFAF0). Use these tones consistently across all pages.
-- Lighting: Soft, warm lighting like gentle morning or golden hour, with gentle shadows
-- Lines: Clean, smooth rounded edges, no sharp angles
-- Background: Simple, soft-focus environments with cohesive color schemes
-- Mood: Cheerful, safe, inviting atmosphere throughout the story
+  return `ART STYLE FOR ALL PAGES (MUST BE CONSISTENT):
+- Technique: Watercolor with soft brushstrokes, translucent washes
+- Colors: Soft pastel palette - sky blues, soft pinks, mint greens, gentle lavenders
+- Background: Light, airy watercolor washes (same style in all pages)
+- Mood: Whimsical, gentle, dreamy
 
-CONSISTENCY RULES FOR ALL PAGES:
-- Keep the SAME color palette, lighting style, and art style in EVERY illustration
-- Backgrounds should have the same soft, warm treatment on every page
-- Character and objects should receive the same lighting treatment on every page`;
+CONSISTENCY RULES (VERY IMPORTANT):
+- SAME character design in every image (same face, same hair, same body)
+- SAME outfit in every image (same clothes, same colors, same design)
+- SAME watercolor style in every image
+- SAME color palette in every image
+- SAME background treatment in every image
+- SAME lighting style in every image`;
 }
 
 function buildStoryPrompt(
@@ -262,7 +263,7 @@ async function generateIllustrations(
   // Generate folder name for saving images for review
   const reviewFolderName = generateStoryFolderName(parsedStory.title, childName);
 
-  // Build all prompts upfront
+  // Build all prompts upfront with character and style consistency
   const pagePrompts = parsedStory.pages.map((page) => {
     const mood = getPageMood(page.pageNumber, parsedStory.pages.length);
     return {
@@ -271,18 +272,12 @@ async function generateIllustrations(
 
 ${characterReference}
 
-SCENE FOR PAGE ${page.pageNumber}:
-${page.text.slice(0, 300)}
+PAGE ${page.pageNumber} of ${parsedStory.pages.length}:
+Scene: ${page.text.slice(0, 250)}
 
-MOOD FOR THIS PAGE: ${mood}
+Mood: ${mood}
 
-IMPORTANT CONSISTENCY INSTRUCTIONS:
-- This is part of a ${parsedStory.pages.length}-page story - visual consistency is CRITICAL
-- Maintain EXACT same character design, clothing, and proportions across ALL pages
-- Use the SAME color palette, lighting style, and art style as established for this story
-- Keep background treatment consistent - same soft, warm style on every page
-- The main character ${childName} MUST be prominently featured and clearly recognizable
-- Do NOT change character appearance, clothing, or proportions under any circumstances`,
+REMEMBER: This is part of a ${parsedStory.pages.length}-page story. The main character ${childName} MUST look exactly the same in this image as in all other pages with the exact same clothes.`,
     };
   });
 
