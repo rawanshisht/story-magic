@@ -389,14 +389,18 @@ REMEMBER: This is part of a ${parsedStory.pages.length}-page story. The main cha
     await processWithConcurrency(
       imagesToSave,
       async ({ pageNumber, base64 }) => {
-        await saveImageForReview(
-          base64,
-          reviewFolderName,
-          pageNumber,
-          pageNumber === 1
-            ? { title: parsedStory.title, childName, moral }
-            : undefined
-        );
+        try {
+          await saveImageForReview(
+            base64,
+            reviewFolderName,
+            pageNumber,
+            pageNumber === 1
+              ? { title: parsedStory.title, childName, moral }
+              : undefined
+          );
+        } catch (saveError) {
+          console.warn(`[Image Review] Skipping save for page ${pageNumber} (filesystem not available in serverless)`);
+        }
       },
       5
     );
