@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { verifyFirebaseToken } from "@/lib/firebase-admin";
+import { redirect } from "next/navigation";
 
 export async function getAuthenticatedUserId(): Promise<string | null> {
   const cookieStore = await cookies();
@@ -15,4 +16,12 @@ export async function getAuthenticatedUserId(): Promise<string | null> {
   }
 
   return decodedToken.uid;
+}
+
+export async function requireAuth(): Promise<string | null> {
+  const userId = await getAuthenticatedUserId();
+  if (!userId) {
+    redirect("/login");
+  }
+  return userId;
 }

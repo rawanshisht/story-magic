@@ -16,7 +16,16 @@ export async function verifyFirebaseToken(token: string) {
   try {
     const decodedToken = await adminAuth.verifyIdToken(token);
     return decodedToken;
-  } catch (error) {
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'code' in error) {
+      const authError = error as { code: string };
+      if (authError.code === 'auth/id-token-expired' || 
+          authError.code === 'auth/id-token-revoked' ||
+          authError.code === 'auth/session-cookie-expired') {
+        console.warn("Firebase token expired, user may need to re-authenticate");
+        return null;
+      }
+    }
     console.error("Error verifying Firebase token:", error);
     return null;
   }

@@ -51,9 +51,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(user);
       
       if (user) {
-        const idToken = await user.getIdToken();
-        document.cookie = `firebase-auth=${idToken}; path=/; max-age=3600; SameSite=Lax`;
-        await syncUserToDatabase(user);
+        try {
+          const idToken = await user.getIdToken(true);
+          document.cookie = `firebase-auth=${idToken}; path=/; max-age=3600; SameSite=Lax`;
+          await syncUserToDatabase(user);
+        } catch (error) {
+          console.error("Failed to refresh ID token:", error);
+          document.cookie = "firebase-auth=; path=/; max-age=0";
+        }
       } else {
         document.cookie = "firebase-auth=; path=/; max-age=0";
       }
@@ -76,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signUpWithEmail = async (email: string, password: string, name?: string) => {
-    const result = await createUserWithEmailAndPassword(auth, email, password);
+    await createUserWithEmailAndPassword(auth, email, password);
     router.push("/dashboard");
   };
 
