@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
-import { getServerSession } from "next-auth";
+import { auth } from "@/lib/auth";
 import Link from "next/link";
-import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { StoryPreview } from "@/components/story/StoryPreview";
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,7 @@ interface StoryPageProps {
 }
 
 export default async function StoryViewPage({ params }: StoryPageProps) {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
   const { id } = await params;
 
   const story = await prisma.story.findUnique({

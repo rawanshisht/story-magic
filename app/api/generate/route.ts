@@ -1,24 +1,31 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { generateStory } from "@/lib/story-generator";
 import { Child } from "@/types";
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth();
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
-    const { childId, moral, customSetting, customTheme } = body;
+    const { childId, moral, customSetting, customTheme, pageCount } = body;
 
     if (!childId || !moral) {
       return NextResponse.json(
         { error: "Child and moral are required" },
+        { status: 400 }
+      );
+    }
+
+    // Validate pageCount if provided
+    if (pageCount !== undefined && (pageCount < 4 || pageCount > 16)) {
+      return NextResponse.json(
+        { error: "Page count must be between 4 and 16" },
         { status: 400 }
       );
     }
@@ -55,7 +62,8 @@ export async function POST(request: Request) {
       child,
       moral,
       customSetting,
-      customTheme
+      customTheme,
+      pageCount
     );
 
     // Save to database

@@ -15,11 +15,13 @@ export function Hero() {
           </div>
 
           <h1 className="mb-6 text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-            Create Magical Stories
-            <span className="block text-primary">Starring Your Child</span>
+            Create Magical Stories{" "}
+            <span className="bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+              Starring Your Child
+            </span>
           </h1>
 
-          <p className="mb-8 text-lg text-muted-foreground md:text-xl">
+          <p className="mb-8 mx-auto max-w-2xl text-lg text-muted-foreground md:text-xl">
             Transform your child into the hero of their own personalized
             storybook. AI-generated tales with beautiful illustrations, tailored
             to their age and featuring important life lessons.

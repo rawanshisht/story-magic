@@ -1,7 +1,6 @@
-import { getServerSession } from "next-auth";
+import { auth } from "@/lib/auth";
 import Link from "next/link";
 import Image from "next/image";
-import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,7 +16,7 @@ import { Story, StoryPage } from "@/types";
 import { getMoralById } from "@/config/morals";
 
 export default async function StoriesPage() {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
 
   const stories: Story[] = await prisma.story.findMany({
     where: { userId: session?.user?.id },

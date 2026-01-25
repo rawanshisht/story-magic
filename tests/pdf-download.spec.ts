@@ -7,8 +7,9 @@ test.describe('PDF Download Functionality', () => {
     
     // The PDF download feature should be accessible
     // Look for download-related elements
-    const hasDownloadButton = await page.locator('button:has-text("Download")').count() > 0 ||
-                              page.locator('a:has-text("Download")').count() > 0;
+    const buttonCount = await page.locator('button:has-text("Download")').count();
+    const linkCount = await page.locator('a:has-text("Download")').count();
+    const hasDownloadButton = buttonCount > 0 || linkCount > 0;
     
     // Check for any download functionality in the UI
     expect(hasDownloadButton || true).toBe(true);

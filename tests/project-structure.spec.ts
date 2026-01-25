@@ -30,8 +30,9 @@ test.describe('Project Structure', () => {
     for (const route of protectedRoutes) {
       await page.goto(route);
       // Should either redirect to login or show login form
-      const hasLoginForm = await page.locator('input[type="email"]').count() > 0 ||
-                          page.locator('text=Sign In').count() > 0;
+      const emailInputCount = await page.locator('input[type="email"]').count();
+      const signInCount = await page.locator('text=Sign In').count();
+      const hasLoginForm = emailInputCount > 0 || signInCount > 0;
       expect(hasLoginForm || true).toBe(true);
     }
   });

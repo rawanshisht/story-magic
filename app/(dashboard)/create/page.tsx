@@ -49,6 +49,7 @@ export default function CreateStoryPage() {
   const [selectedMoral, setSelectedMoral] = useState<string>("");
   const [customSetting, setCustomSetting] = useState<string>("");
   const [customTheme, setCustomTheme] = useState<string>("");
+  const [pageCount, setPageCount] = useState<number | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showNewChildForm, setShowNewChildForm] = useState(false);
@@ -145,6 +146,7 @@ export default function CreateStoryPage() {
           moral: selectedMoral,
           customSetting: customSetting || undefined,
           customTheme: customTheme || undefined,
+          pageCount: pageCount || undefined,
         }),
       });
 
@@ -330,6 +332,32 @@ export default function CreateStoryPage() {
                   onChange={(e) => setCustomTheme(e.target.value)}
                 />
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="pageCount">Number of Pages (Optional)</Label>
+                <Input
+                  id="pageCount"
+                  type="number"
+                  min={4}
+                  max={16}
+                  placeholder="Leave empty for age-appropriate default"
+                  value={pageCount ?? ""}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === "") {
+                      setPageCount(undefined);
+                    } else {
+                      const num = parseInt(value);
+                      if (!isNaN(num) && num >= 4 && num <= 16) {
+                        setPageCount(num);
+                      }
+                    }
+                  }}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Choose between 4-16 pages, or leave empty for age-appropriate default
+                </p>
+              </div>
             </div>
           )}
 
@@ -370,6 +398,12 @@ export default function CreateStoryPage() {
                         <p>
                           <span className="text-muted-foreground">Theme:</span>{" "}
                           {customTheme}
+                        </p>
+                      )}
+                      {pageCount && (
+                        <p>
+                          <span className="text-muted-foreground">Pages:</span>{" "}
+                          {pageCount}
                         </p>
                       )}
                     </div>

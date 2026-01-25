@@ -51,6 +51,7 @@ export interface GenerateStoryRequest {
   moral: string;
   customSetting?: string;
   customTheme?: string;
+  pageCount?: number;  // Optional, falls back to age-based default (valid range: 4-16)
 }
 
 export interface GenerateStoryResponse {

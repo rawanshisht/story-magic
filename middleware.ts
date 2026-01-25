@@ -1,28 +1,28 @@
-import { withAuth } from "next-auth/middleware";
+import NextAuth from "next-auth";
+import { authConfig } from "@/lib/auth.config";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-export default withAuth(
-  function middleware(req) {
-    return NextResponse.next();
-  },
-  {
-    callbacks: {
-      authorized: ({ token, req }) => {
-        // Protected routes
-        const protectedPaths = ["/dashboard", "/create", "/stories"];
-        const isProtectedPath = protectedPaths.some((path) =>
-          req.nextUrl.pathname.startsWith(path)
-        );
+const { auth } = NextAuth(authConfig);
 
-        if (isProtectedPath) {
-          return !!token;
-        }
+export default auth((req) => {
+  const isLoggedIn = !!req.auth;
+  const { pathname } = req.nextUrl;
 
-        return true;
-      },
-    },
+  // Protected routes
+  const protectedPaths = ["/dashboard", "/create", "/stories"];
+  const isProtectedPath = protectedPaths.some((path) =>
+    pathname.startsWith(path)
+  );
+
+  if (isProtectedPath && !isLoggedIn) {
+    const loginUrl = new URL("/login", req.url);
+    loginUrl.searchParams.set("callbackUrl", pathname);
+    return NextResponse.redirect(loginUrl);
   }
-);
+
+  return NextResponse.next();
+});
 
 export const config = {
   matcher: ["/dashboard/:path*", "/create/:path*", "/stories/:path*"],

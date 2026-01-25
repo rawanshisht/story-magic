@@ -1,7 +1,6 @@
-import { getServerSession } from "next-auth";
+import { auth } from "@/lib/auth";
 import Link from "next/link";
 import Image from "next/image";
-import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,7 +15,7 @@ import { Plus, BookOpen, User, Sparkles } from "lucide-react";
 import { Child, Story, StoryPage } from "@/types";
 
 export default async function DashboardPage() {
-  const session = await getServerSession(authOptions);
+  const session = await auth();
 
   const [children, stories]: [Child[], Story[]] = await Promise.all([
     prisma.child.findMany({
