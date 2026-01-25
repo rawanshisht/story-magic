@@ -24,7 +24,13 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("TTS Error:", error);
-    return NextResponse.json({ error: "Failed to generate speech" }, { status: 500 });
+    console.error("TTS API Error:", error);
+    if (error instanceof Error) {
+      console.error("Error message:", error.message);
+    }
+    return NextResponse.json(
+      { error: "Failed to generate speech", details: error instanceof Error ? error.message : "Unknown error" },
+      { status: 500 }
+    );
   }
 }

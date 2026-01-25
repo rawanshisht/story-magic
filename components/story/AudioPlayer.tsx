@@ -42,7 +42,9 @@ export function AudioPlayer({ text, className, autoPlay = false }: AudioPlayerPr
       });
 
       if (!response.ok) {
-        throw new Error("Failed to generate audio");
+        const errorData = await response.json().catch(() => ({}));
+        console.error("TTS API Error:", errorData);
+        throw new Error(errorData.error || "Failed to generate audio");
       }
 
       const blob = await response.blob();
@@ -50,6 +52,7 @@ export function AudioPlayer({ text, className, autoPlay = false }: AudioPlayerPr
       setAudioUrl(url);
       return url;
     } catch (error) {
+      console.error("AudioPlayer Error:", error);
       toast({
         title: "Audio Error",
         description: "Could not generate speech for this page.",
