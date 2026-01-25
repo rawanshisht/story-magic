@@ -16,6 +16,7 @@ import { BookOpen, Sparkles, ArrowLeft, Trash2, Download } from "lucide-react";
 import { Story, StoryPage } from "@/types";
 import { getMoralById } from "@/config/morals";
 import { getUserIdFromCookie } from "@/lib/firebase-admin";
+import { DeleteStoryButton } from "./[id]/delete-button";
 
 export default async function StoriesPage() {
   const cookieStore = await cookies();
@@ -77,44 +78,54 @@ export default async function StoriesPage() {
             const firstPage = content[0];
 
             return (
-              <Link key={story.id} href={`/stories/${story.id}`}>
-                <Card className="overflow-hidden transition-colors hover:border-primary/50">
-                  <div className="relative aspect-video bg-muted">
-                    {firstPage?.imageUrl &&
-                    firstPage.imageUrl !== "/placeholder-illustration.svg" ? (
-                      <Image
-                        src={firstPage.imageUrl}
-                        alt={story.title}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
-                        <BookOpen className="h-8 w-8 text-muted-foreground" />
-                      </div>
-                    )}
-                  </div>
-                  <CardHeader>
-                    <CardTitle className="line-clamp-1">
-                      {story.title}
-                    </CardTitle>
-                    <CardDescription>
-                      For {story.child?.name} &bull;{" "}
-                      {formatDate(story.createdAt)}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-2">
-                      <span className="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
-                        {story.moral}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {story.pageCount} pages
-                      </span>
+              <div key={story.id} className="group relative">
+                <Link href={`/stories/${story.id}`}>
+                  <Card className="overflow-hidden transition-colors hover:border-primary/50">
+                    <div className="relative aspect-video bg-muted">
+                      {firstPage?.imageUrl &&
+                      firstPage.imageUrl !== "/placeholder-illustration.svg" ? (
+                        <Image
+                          src={firstPage.imageUrl}
+                          alt={story.title}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
+                          <BookOpen className="h-8 w-8 text-muted-foreground" />
+                        </div>
+                      )}
                     </div>
-                  </CardContent>
-                </Card>
-              </Link>
+                    <CardHeader>
+                      <CardTitle className="line-clamp-1">
+                        {story.title}
+                      </CardTitle>
+                      <CardDescription>
+                        For {story.child?.name} &bull;{" "}
+                        {formatDate(story.createdAt)}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+                            {story.moral}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {story.pageCount} pages
+                          </span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+                <div className="absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100">
+                  <DeleteStoryButton
+                    storyId={story.id}
+                    storyTitle={story.title}
+                  />
+                </div>
+              </div>
             );
           })}
         </div>

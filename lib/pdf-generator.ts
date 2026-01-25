@@ -69,7 +69,7 @@ function createCoverPage(doc: PDFKit.PDFDocument, options: PDFGeneratorOptions):
   
   // Title
   doc.fillColor("#FFFFFF")
-    .fontSize(36)
+    .fontSize(48)
     .font("Times-Bold")
     .text(options.title, 50, 200, {
       align: "center",
@@ -77,16 +77,16 @@ function createCoverPage(doc: PDFKit.PDFDocument, options: PDFGeneratorOptions):
     });
 
   // Subtitle
-  doc.fontSize(18)
+  doc.fontSize(24)
     .font("Times-Roman")
-    .text(`A story about ${options.moral} featuring ${options.childName}`, 50, 300, {
+    .text(`A story about ${options.moral} featuring ${options.childName}`, 50, 320, {
       align: "center",
       width: pageWidth - 100,
     });
 
   // Footer
-  doc.fontSize(14)
-    .text("Created with StoryBook", 50, 500, {
+  doc.fontSize(18)
+    .text("Created with StoryBook", 50, 550, {
       align: "center",
       width: pageWidth - 100,
     });
@@ -101,11 +101,11 @@ function createStoryPage(doc: PDFKit.PDFDocument, page: StoryPage): void {
   doc.fill("#FFFFFF");
 
   // Calculate image dimensions
-  const imageWidth = 400;
-  const imageMaxHeight = 280;
+  const imageWidth = 450;
+  const imageMaxHeight = 320;
   const imageX = (pageWidth - imageWidth) / 2;
-  const imageY = 80;
-  const imageTextPadding = 40;
+  const imageY = 60;
+  const imageTextPadding = 50;
 
   let renderedImageHeight = 0;
 
@@ -138,19 +138,19 @@ function createStoryPage(doc: PDFKit.PDFDocument, page: StoryPage): void {
   const textY = imageY + renderedImageHeight + imageTextPadding;
   
   doc.fillColor("#1F2937")
-    .fontSize(16)
+    .fontSize(24)
     .font("Times-Roman")
-    .text(page.text, 70, textY, {
+    .text(page.text, 60, textY, {
       align: "center",
-      width: pageWidth - 140,
-      lineGap: 4,
+      width: pageWidth - 120,
+      lineGap: 6,
     });
 
   // Page number
   doc.fillColor("#9CA3AF")
-    .fontSize(12)
+    .fontSize(14)
     .font("Times-Roman")
-    .text(`Page ${page.pageNumber}`, 0, pageHeight - 40, {
+    .text(`Page ${page.pageNumber}`, 0, pageHeight - 50, {
       align: "center",
       width: pageWidth,
     });
@@ -179,7 +179,7 @@ function createEndPage(doc: PDFKit.PDFDocument, options: PDFGeneratorOptions): v
 
   // Title
   doc.fillColor("#FFFFFF")
-    .fontSize(36)
+    .fontSize(48)
     .font("Times-Bold")
     .text("The End", 50, 200, {
       align: "center",
@@ -187,16 +187,16 @@ function createEndPage(doc: PDFKit.PDFDocument, options: PDFGeneratorOptions): v
     });
 
   // Thank you message
-  doc.fontSize(18)
+  doc.fontSize(24)
     .font("Times-Roman")
-    .text("Thank you for reading!", 50, 280, {
+    .text("Thank you for reading!", 50, 300, {
       align: "center",
       width: pageWidth - 100,
     });
 
   // Footer
-  doc.fontSize(10)
-    .text("This story was created with love by StoryBook", 50, 500, {
+  doc.fontSize(14)
+    .text("This story was created with love by StoryBook", 50, 550, {
       align: "center",
       width: pageWidth - 100,
     });
