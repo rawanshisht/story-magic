@@ -165,7 +165,7 @@ export function ImageViewer({
             >
               {currentPage?.imageUrl &&
               currentPage.imageUrl !== "/placeholder-illustration.svg" ? (
-                <div className="relative w-full aspect-[4/3] bg-white rounded-[3rem] overflow-hidden shadow-[0_32px_64px_-12px_rgba(0,0,0,0.15)] border-8 border-white ring-4 ring-primary/5">
+                <div className="relative w-full aspect-square bg-white rounded-[3rem] overflow-hidden shadow-[0_32px_64px_-12px_rgba(0,0,0,0.15)] border-8 border-white ring-4 ring-primary/5">
                   <Image
                     src={currentPage.imageUrl}
                     alt={`Page ${currentPage.pageNumber}`}
@@ -176,7 +176,7 @@ export function ImageViewer({
                   />
                 </div>
               ) : (
-                <div className="w-full aspect-[4/3] flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 rounded-[3rem]">
+                <div className="w-full aspect-square flex items-center justify-center bg-gradient-to-br from-primary/5 to-secondary/5 rounded-[3rem]">
                   <div className="text-center">
                     <Maximize2 className="h-24 w-24 text-primary/20 mx-auto mb-6" />
                     <p className="text-3xl font-bold text-muted-foreground">

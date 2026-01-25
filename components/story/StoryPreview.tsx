@@ -60,7 +60,7 @@ export function StoryPreview({ title, pages, storyId }: StoryPreviewProps) {
 
           <Card className="book-page w-full max-w-2xl overflow-hidden shadow-2xl transition-all hover:shadow-primary/10 border-4 border-primary/20 rounded-[2.5rem]">
             <div 
-              className="relative aspect-[4/3] w-full bg-muted group cursor-zoom-in" 
+              className="relative aspect-square w-full bg-muted group cursor-zoom-in" 
               onClick={() => setIsFullscreenViewerOpen(true)}
             >
               {page?.imageUrl && page.imageUrl !== "/placeholder-illustration.svg" ? (
@@ -68,7 +68,7 @@ export function StoryPreview({ title, pages, storyId }: StoryPreviewProps) {
                   src={page.imageUrl}
                   alt={`Page ${page.pageNumber} illustration`}
                   fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="object-contain transition-transform duration-700 group-hover:scale-105"
                   priority
                 />
               ) : (
