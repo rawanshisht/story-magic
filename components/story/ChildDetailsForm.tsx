@@ -176,7 +176,10 @@ export function ChildDetailsForm({
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid gap-6 md:grid-cols-2 bg-secondary/10 p-6 rounded-3xl border-2 border-secondary/20">
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-lg font-bold">What is the Hero&apos;s name?</Label>
+            <Label htmlFor="name" className="text-lg font-bold">
+              What is the Hero&apos;s name? <span className="text-destructive">*</span>
+              <span className="ml-2 text-xs font-normal text-muted-foreground uppercase tracking-wider">(Required)</span>
+            </Label>
             <Input
               id="name"
               placeholder="e.g. Alex, Sam..."
@@ -193,7 +196,10 @@ export function ChildDetailsForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="age" className="text-lg font-bold">How old is the Hero?</Label>
+            <Label htmlFor="age" className="text-lg font-bold">
+              How old is the Hero? <span className="text-destructive">*</span>
+              <span className="ml-2 text-xs font-normal text-muted-foreground uppercase tracking-wider">(Required)</span>
+            </Label>
             <Select
               value={formData.age}
               onValueChange={(value) => {
@@ -222,7 +228,10 @@ export function ChildDetailsForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="gender" className="text-lg font-bold">Is the Hero a boy or girl?</Label>
+            <Label htmlFor="gender" className="text-lg font-bold">
+              Is the Hero a boy or girl? <span className="text-destructive">*</span>
+              <span className="ml-2 text-xs font-normal text-muted-foreground uppercase tracking-wider">(Required)</span>
+            </Label>
             <Select
               value={formData.gender}
               onValueChange={(value) => {
@@ -248,7 +257,10 @@ export function ChildDetailsForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="skinTone" className="text-lg font-bold">Skin Tone</Label>
+            <Label htmlFor="skinTone" className="text-lg font-bold">
+              Skin Tone
+              <span className="ml-2 text-xs font-normal text-muted-foreground uppercase tracking-wider">(Optional)</span>
+            </Label>
             <Select
               value={formData.skinTone}
               onValueChange={(value) => handleChange("skinTone", value)}
@@ -267,7 +279,10 @@ export function ChildDetailsForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="eyeColor" className="text-lg font-bold">Eye Color</Label>
+            <Label htmlFor="eyeColor" className="text-lg font-bold">
+              Eye Color
+              <span className="ml-2 text-xs font-normal text-muted-foreground uppercase tracking-wider">(Optional)</span>
+            </Label>
             <Select
               value={formData.eyeColor}
               onValueChange={(value) => handleChange("eyeColor", value)}
@@ -286,7 +301,10 @@ export function ChildDetailsForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="hairColor" className="text-lg font-bold">Hair Color</Label>
+            <Label htmlFor="hairColor" className="text-lg font-bold">
+              Hair Color
+              <span className="ml-2 text-xs font-normal text-muted-foreground uppercase tracking-wider">(Optional)</span>
+            </Label>
             <Select
               value={formData.hairColor}
               onValueChange={(value) => handleChange("hairColor", value)}
@@ -305,7 +323,10 @@ export function ChildDetailsForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="hairStyle" className="text-lg font-bold">Hair Style</Label>
+            <Label htmlFor="hairStyle" className="text-lg font-bold">
+              Hair Style
+              <span className="ml-2 text-xs font-normal text-muted-foreground uppercase tracking-wider">(Optional)</span>
+            </Label>
             <Select
               value={formData.hairStyle}
               onValueChange={(value) => handleChange("hairStyle", value)}
@@ -324,7 +345,10 @@ export function ChildDetailsForm({
           </div>
 
           <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="interests" className="text-lg font-bold">What does the Hero like?</Label>
+            <Label htmlFor="interests" className="text-lg font-bold">
+              What does the Hero like?
+              <span className="ml-2 text-xs font-normal text-muted-foreground uppercase tracking-wider">(Optional)</span>
+            </Label>
             <Input
               id="interests"
               placeholder="e.g. dinosaurs, space, pizza..."
