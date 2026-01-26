@@ -64,7 +64,7 @@ export function Navbar() {
               </Link>
               <Link href="/stories" className="hidden md:block">
                 <Button variant="ghost" size="lg" className="text-lg font-bold text-foreground">
-                  <BookOpen className="mr-2 h-6 w-6 text-accent" />
+                  <BookOpen className="mr-2 h-6 w-6 text-primary" />
                   Stories
                 </Button>
               </Link>
@@ -113,7 +113,7 @@ export function Navbar() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild className="rounded-xl cursor-pointer">
                     <Link href="/stories" className="w-full font-bold">
-                      <BookOpen className="mr-2 h-5 w-5 text-accent" />
+                      <BookOpen className="mr-2 h-5 w-5 text-primary" />
                       My Stories
                     </Link>
                   </DropdownMenuItem>
