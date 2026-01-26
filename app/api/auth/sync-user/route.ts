@@ -12,27 +12,18 @@ export async function POST(request: Request) {
       );
     }
 
-    const existingUser = await prisma.user.findUnique({
-      where: { id: uid },
-    });
-
-    if (existingUser) {
-      await prisma.user.update({
-        where: { id: uid },
-        data: {
-          name: name || existingUser.name,
-          image: photoURL || existingUser.image,
-        },
-      });
-      return NextResponse.json({ success: true, user: existingUser });
-    }
-
-    const user = await prisma.user.create({
-      data: {
+    const user = await prisma.user.upsert({
+      where: { email },
+      create: {
         id: uid,
         email,
         name: name || email.split("@")[0],
         image: photoURL,
+      },
+      update: {
+        id: uid,
+        name: name || undefined,
+        image: photoURL || undefined,
       },
     });
 
