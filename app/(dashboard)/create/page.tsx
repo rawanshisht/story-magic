@@ -53,34 +53,6 @@ export default function CreateStoryPage() {
   const [customTheme, setCustomTheme] = useState<string>("");
   const [pageCount, setPageCount] = useState<number | undefined>(undefined);
   const [showNewChildForm, setShowNewChildForm] = useState(false);
-  const [generatedStoryId, setGeneratedStoryId] = useState<string | null>(null);
-  const [isPolling, setIsPolling] = useState(false);
-
-  // Poll for story completion
-  useEffect(() => {
-    if (!isPolling || !generatedStoryId) return;
-
-    const pollInterval = setInterval(async () => {
-      try {
-        const response = await fetch(`/api/stories/status?storyId=${generatedStoryId}`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.status === "completed") {
-            setIsPolling(false);
-            toast({
-              title: "Story Created!",
-              description: "Your personalized story has been saved!",
-            });
-            router.push(`/stories/${generatedStoryId}`);
-          }
-        }
-      } catch (error) {
-        console.error("Polling error:", error);
-      }
-    }, 3000);
-
-    return () => clearInterval(pollInterval);
-  }, [isPolling, generatedStoryId, router, toast]);
 
   // Fetch children
   const { data: children = [], isLoading: isLoadingChildren } = useQuery<Child[]>({
@@ -179,21 +151,12 @@ export default function CreateStoryPage() {
 
       return response.json();
     },
-    onSuccess: (data) => {
-      if (data.jobId) {
-        setGeneratedStoryId(data.jobId);
-        setIsPolling(true);
-        toast({
-          title: "Story Generation Started!",
-          description: "Your story is being created in the background. This takes about 30-60 seconds.",
-        });
-      } else if (data.id) {
-        toast({
-          title: "Story Created & Saved!",
-          description: "Your personalized story has been saved to your account",
-        });
-        router.push(`/stories/${data.id}`);
-      }
+    onSuccess: (story) => {
+      toast({
+        title: "Story Created & Saved!",
+        description: "Your personalized story has been saved to your account",
+      });
+      router.push(`/stories/${story.id}`);
     },
     onError: (error) => {
       toast({
@@ -399,11 +362,11 @@ export default function CreateStoryPage() {
                         if (value === "") setPageCount(undefined);
                         else {
                           const num = parseInt(value);
-                          if (!isNaN(num) && num >= 4 && num <= 6) setPageCount(num);
+                          if (!isNaN(num) && num >= 4 && num <= 4) setPageCount(num);
                         }
                       }}
                     />
-                    <span className="text-muted-foreground font-bold whitespace-nowrap">Pages (4-6)</span>
+                    <span className="text-muted-foreground font-bold whitespace-nowrap">Pages (4)</span>
                   </div>
                 </div>
             </div>
@@ -412,7 +375,7 @@ export default function CreateStoryPage() {
           {/* Step 4: Generate */}
           {currentStep === 3 && (
             <div className="space-y-8 text-center">
-              {generateStoryMutation.isPending || isPolling ? (
+              {generateStoryMutation.isPending ? (
                 <div className="py-12 space-y-6">
                   <div className="flex justify-center">
                     <div className="relative">
@@ -422,21 +385,9 @@ export default function CreateStoryPage() {
                       </div>
                     </div>
                   </div>
-                  <h3 className="text-3xl font-black text-primary animate-pulse">
-                    {isPolling ? "Almost there..." : "Mixing the Magic..."}
-                  </h3>
+                  <h3 className="text-3xl font-black text-primary animate-pulse">Mixing the Magic...</h3>
                   <p className="text-xl text-muted-foreground font-medium">
-                    {isPolling
-                      ? "Your story is being finalized! Just a moment..."
-                      : "Our story fairies are painting the pictures and writing the words!"}
-                  </p>
-                  <div className="max-w-xs mx-auto">
-                    <Progress value={isPolling ? 75 : 50} className="h-3" />
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {isPolling
-                      ? "This usually takes 30-60 seconds"
-                      : "Starting the magic..."}
+                    Our story fairies are painting the pictures and writing the words!
                   </p>
                 </div>
               ) : (
@@ -482,7 +433,7 @@ export default function CreateStoryPage() {
       </Card>
 
       {/* Navigation Buttons */}
-      {!generateStoryMutation.isPending && !isPolling && (
+      {!generateStoryMutation.isPending && (
         <div className="flex justify-between items-center px-4">
           <Button
             variant="ghost"
