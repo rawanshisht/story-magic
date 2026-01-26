@@ -382,7 +382,9 @@ REMEMBER: This is part of a ${parsedStory.pages.length}-page story. The main cha
   }
 
   // Phase 3: Save images for manual review (in parallel)
-  if (imagesToSave.length > 0) {
+  if (process.env.NETLIFY === "true") {
+    console.log(`[Image Review] Skipping (serverless environment)`);
+  } else {
     console.log(`[Image Review] Saving ${imagesToSave.length} images to review folder: ${reviewFolderName}`);
     const saveStartTime = Date.now();
 
@@ -399,7 +401,7 @@ REMEMBER: This is part of a ${parsedStory.pages.length}-page story. The main cha
               : undefined
           );
         } catch (saveError) {
-          console.warn(`[Image Review] Skipping save for page ${pageNumber} (filesystem not available in serverless)`);
+          console.warn(`[Image Review] Skipping save for page ${pageNumber} (filesystem not available)`);
         }
       },
       5
