@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAuthenticatedUserId } from "@/lib/auth-helper";
 import prisma from "@/lib/prisma";
-import { generateStory } from "@/lib/story-generator";
-import { Child } from "@/types";
+import { inngest, EVENTS } from "@/lib/inngest";
 
 export async function POST(request: Request) {
   try {
@@ -40,43 +39,28 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Child not found" }, { status: 404 });
     }
 
-    const child: Child = {
-      id: childData.id,
-      name: childData.name,
-      age: childData.age,
-      gender: childData.gender,
-      skinTone: childData.skinTone,
-      eyeColor: childData.eyeColor,
-      hairColor: childData.hairColor,
-      hairStyle: childData.hairStyle || undefined,
-      interests: childData.interests,
-      userId: childData.userId,
-      createdAt: childData.createdAt,
-    };
+    const jobId = `story-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
-    const generatedStory = await generateStory(
-      child,
-      moral,
-      customSetting,
-      customTheme,
-      pageCount
-    );
-
-    const story = await prisma.story.create({
+    await inngest.send({
+      name: EVENTS.STORY_GENERATION_STARTED,
       data: {
-        title: generatedStory.title,
-        moral,
-        content: JSON.parse(JSON.stringify(generatedStory.pages)),
+        userId,
         childId,
-        userId: userId,
-        pageCount: generatedStory.pages.length,
+        moral,
+        customSetting,
+        customTheme,
+        pageCount,
       },
-      include: { child: true },
     });
 
-    return NextResponse.json(story);
+    return NextResponse.json({
+      success: true,
+      jobId,
+      message: "Story generation started in background",
+      estimatedTime: "30-60 seconds",
+    });
   } catch (error) {
-    console.error("Error generating story:", error);
+    console.error("Error starting story generation:", error);
     if (error instanceof Error) {
       console.error("Error name:", error.name);
       console.error("Error message:", error.message);
@@ -84,7 +68,7 @@ export async function POST(request: Request) {
     }
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : "Failed to generate story",
+        error: error instanceof Error ? error.message : "Failed to start story generation",
         details: process.env.NODE_ENV === "development" && error instanceof Error ? error.stack : undefined,
       },
       { status: 500 }
