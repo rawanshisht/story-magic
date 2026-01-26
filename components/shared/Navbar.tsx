@@ -86,7 +86,7 @@ export function Navbar() {
                         alt={user.displayName || ""}
                       />
                       <AvatarFallback className="bg-secondary text-secondary-foreground font-bold text-lg">
-                        {getInitials(user.displayName || "U")}
+                        {getInitials(user.displayName || user.email?.split("@")[0] || "U")}
                       </AvatarFallback>
                     </Avatar>
                   </Button>

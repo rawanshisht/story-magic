@@ -81,7 +81,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signUpWithEmail = async (email: string, password: string, name?: string) => {
-    await createUserWithEmailAndPassword(auth, email, password);
+    const { user } = await createUserWithEmailAndPassword(auth, email, password);
+    
+    if (name) {
+      await import("firebase/auth").then(({ updateProfile }) => 
+        updateProfile(user, { displayName: name })
+      );
+    }
+    
     router.push("/dashboard");
   };
 
