@@ -382,7 +382,12 @@ REMEMBER: This is part of a ${parsedStory.pages.length}-page story. The main cha
   }
 
   // Phase 3: Save images for manual review (in parallel)
-  if (process.env.NETLIFY === "true") {
+  // Skip in serverless environments (filesystem not available)
+  const isServerless = process.env.NETLIFY === "true" || 
+                       process.env.VERCEL === "true" || 
+                       process.cwd().startsWith("/var/task");
+  
+  if (isServerless) {
     console.log(`[Image Review] Skipping (serverless environment)`);
   } else {
     console.log(`[Image Review] Saving ${imagesToSave.length} images to review folder: ${reviewFolderName}`);
