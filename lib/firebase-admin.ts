@@ -12,9 +12,28 @@ const firebaseAdminConfig = {
 const adminApp = getApps().length > 0 ? getApps()[0] : initializeApp(firebaseAdminConfig, "admin");
 const adminAuth = getAuth(adminApp);
 
+interface TokenCacheEntry {
+  uid: string;
+  expiry: number;
+}
+
+const tokenCache = new Map<string, TokenCacheEntry>();
+const TOKEN_CACHE_TTL = 5 * 60 * 1000;
+
 export async function verifyFirebaseToken(token: string) {
   try {
+    const cached = tokenCache.get(token);
+    if (cached && Date.now() < cached.expiry) {
+      return { uid: cached.uid };
+    }
+
     const decodedToken = await adminAuth.verifyIdToken(token);
+    
+    tokenCache.set(token, {
+      uid: decodedToken.uid,
+      expiry: Date.now() + TOKEN_CACHE_TTL,
+    });
+
     return decodedToken;
   } catch (error: unknown) {
     if (error && typeof error === 'object' && 'code' in error) {
