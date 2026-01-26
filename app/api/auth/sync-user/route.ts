@@ -12,6 +12,10 @@ export async function POST(request: Request) {
       );
     }
 
+    const updateData: Record<string, unknown> = { id: uid };
+    if (name) updateData.name = name;
+    if (photoURL) updateData.image = photoURL;
+
     const user = await prisma.user.upsert({
       where: { email },
       create: {
@@ -20,18 +24,14 @@ export async function POST(request: Request) {
         name: name || email.split("@")[0],
         image: photoURL,
       },
-      update: {
-        id: uid,
-        name: name || undefined,
-        image: photoURL || undefined,
-      },
+      update: updateData,
     });
 
     return NextResponse.json({ success: true, user });
   } catch (error) {
     console.error("Sync user error:", error);
     return NextResponse.json(
-      { error: "Failed to sync user" },
+      { error: error instanceof Error ? error.message : "Failed to sync user" },
       { status: 500 }
     );
   }
