@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import Image from "next/image";
-import prisma from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,6 +15,9 @@ import { Plus, BookOpen, User, Sparkles } from "lucide-react";
 import { Child, Story, StoryPage } from "@/types";
 import { getUserIdFromCookie } from "@/lib/firebase-admin";
 import { Navbar } from "@/components/shared/Navbar";
+import { getCachedUser, getCachedChildren, getCachedRecentStories } from "@/lib/data-cache";
+
+export const revalidate = 60;
 
 export default async function DashboardPage() {
   const cookieStore = await cookies();
@@ -31,21 +33,11 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-  });
+  const user = await getCachedUser(userId);
 
   const [children, stories]: [Child[], Story[]] = await Promise.all([
-    prisma.child.findMany({
-      where: { userId: userId },
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.story.findMany({
-      where: { userId: userId },
-      include: { child: true },
-      orderBy: { createdAt: "desc" },
-      take: 6,
-    }),
+    getCachedChildren(userId),
+    getCachedRecentStories(userId),
   ]);
 
   const userName = user?.name?.split(" ")[0] || user?.email?.split("@")[0] || "Parent";

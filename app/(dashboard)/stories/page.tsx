@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import Image from "next/image";
-import prisma from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,6 +16,9 @@ import { Story, StoryPage } from "@/types";
 import { getMoralById } from "@/config/morals";
 import { getUserIdFromCookie } from "@/lib/firebase-admin";
 import { DeleteStoryButton } from "./[id]/delete-button";
+import { getCachedStories } from "@/lib/data-cache";
+
+export const revalidate = 60;
 
 export default async function StoriesPage() {
   const cookieStore = await cookies();
@@ -32,11 +34,7 @@ export default async function StoriesPage() {
     redirect("/login");
   }
 
-  const stories: Story[] = await prisma.story.findMany({
-    where: { userId: userId },
-    include: { child: true },
-    orderBy: { createdAt: "desc" },
-  });
+  const stories: Story[] = await getCachedStories(userId);
 
   return (
     <div className="space-y-8">
