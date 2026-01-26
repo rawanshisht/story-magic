@@ -2,28 +2,28 @@ import { AgeSettings } from "@/types";
 
 export const AGE_SETTINGS: Record<string, AgeSettings> = {
   "2-3": {
-    pageCount: 6,
+    pageCount: 4,
     wordsPerPage: { min: 20, max: 30 },
     vocabulary: "simple",
     themes: ["colors", "animals", "family", "bedtime"],
     sentenceStructure: "very short, repetitive sentences with familiar words",
   },
   "4-5": {
-    pageCount: 8,
+    pageCount: 4,
     wordsPerPage: { min: 40, max: 50 },
     vocabulary: "basic",
     themes: ["friendship", "sharing", "bravery", "helping"],
     sentenceStructure: "short sentences with some simple dialogue",
   },
   "6-7": {
-    pageCount: 10,
+    pageCount: 6,
     wordsPerPage: { min: 60, max: 80 },
     vocabulary: "intermediate",
     themes: ["adventure", "problem-solving", "kindness", "curiosity"],
     sentenceStructure: "varied sentence lengths with engaging dialogue",
   },
   "8-10": {
-    pageCount: 12,
+    pageCount: 6,
     wordsPerPage: { min: 100, max: 120 },
     vocabulary: "advanced",
     themes: ["perseverance", "honesty", "empathy", "responsibility"],

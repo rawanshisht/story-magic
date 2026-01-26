@@ -22,9 +22,9 @@ export async function POST(request: Request) {
       );
     }
 
-    if (pageCount !== undefined && (pageCount < 4 || pageCount > 16)) {
+    if (pageCount !== undefined && (pageCount < 4 || pageCount > 6)) {
       return NextResponse.json(
-        { error: "Page count must be between 4 and 16" },
+        { error: "Page count must be between 4 and 6" },
         { status: 400 }
       );
     }
@@ -77,10 +77,15 @@ export async function POST(request: Request) {
     return NextResponse.json(story);
   } catch (error) {
     console.error("Error generating story:", error);
+    if (error instanceof Error) {
+      console.error("Error name:", error.name);
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+    }
     return NextResponse.json(
       {
-        error:
-          error instanceof Error ? error.message : "Failed to generate story",
+        error: error instanceof Error ? error.message : "Failed to generate story",
+        details: process.env.NODE_ENV === "development" && error instanceof Error ? error.stack : undefined,
       },
       { status: 500 }
     );
