@@ -56,7 +56,8 @@ export const ModelName = {
   Story: 'Story',
   Account: 'Account',
   Session: 'Session',
-  VerificationToken: 'VerificationToken'
+  VerificationToken: 'VerificationToken',
+  StoryJob: 'StoryJob'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -156,6 +157,25 @@ export const VerificationTokenScalarFieldEnum = {
 } as const
 
 export type VerificationTokenScalarFieldEnum = (typeof VerificationTokenScalarFieldEnum)[keyof typeof VerificationTokenScalarFieldEnum]
+
+
+export const StoryJobScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  childId: 'childId',
+  moral: 'moral',
+  customSetting: 'customSetting',
+  customTheme: 'customTheme',
+  pageCount: 'pageCount',
+  status: 'status',
+  progress: 'progress',
+  storyId: 'storyId',
+  error: 'error',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StoryJobScalarFieldEnum = (typeof StoryJobScalarFieldEnum)[keyof typeof StoryJobScalarFieldEnum]
 
 
 export const SortOrder = {

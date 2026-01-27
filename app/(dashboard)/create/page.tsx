@@ -53,6 +53,46 @@ export default function CreateStoryPage() {
   const [customTheme, setCustomTheme] = useState<string>("");
   const [pageCount, setPageCount] = useState<number | undefined>(undefined);
   const [showNewChildForm, setShowNewChildForm] = useState(false);
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [generationProgress, setGenerationProgress] = useState(0);
+  const [isPolling, setIsPolling] = useState(false);
+
+  // Poll for job status
+  useEffect(() => {
+    if (!isPolling || !jobId) return;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/stories/status?jobId=${jobId}`);
+        if (response.ok) {
+          const data = await response.json();
+          
+          if (data.status === "complete" && data.storyId) {
+            setIsPolling(false);
+            setGenerationProgress(100);
+            toast({
+              title: "Story Created!",
+              description: "Your personalized story has been saved!",
+            });
+            router.push(`/stories/${data.storyId}`);
+          } else if (data.status === "failed") {
+            setIsPolling(false);
+            toast({
+              title: "Generation Failed",
+              description: data.error || "Something went wrong. Please try again.",
+              variant: "destructive",
+            });
+          } else {
+            setGenerationProgress(data.progress || 0);
+          }
+        }
+      } catch (error) {
+        console.error("Polling error:", error);
+      }
+    }, 5000);
+
+    return () => clearInterval(pollInterval);
+  }, [isPolling, jobId, router, toast]);
 
   // Fetch children
   const { data: children = [], isLoading: isLoadingChildren } = useQuery<Child[]>({
@@ -132,7 +172,7 @@ export default function CreateStoryPage() {
         throw new Error("Please select a child and moral");
       }
 
-      const response = await fetch("/api/generate", {
+      const response = await fetch("/.netlify/functions/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -151,12 +191,22 @@ export default function CreateStoryPage() {
 
       return response.json();
     },
-    onSuccess: (story) => {
-      toast({
-        title: "Story Created & Saved!",
-        description: "Your personalized story has been saved to your account",
-      });
-      router.push(`/stories/${story.id}`);
+    onSuccess: (data) => {
+      if (data.jobId) {
+        setJobId(data.jobId);
+        setIsPolling(true);
+        setGenerationProgress(0);
+        toast({
+          title: "Story Generation Started!",
+          description: "Your story is being created. This takes a few minutes.",
+        });
+      } else if (data.storyId) {
+        toast({
+          title: "Story Created!",
+          description: "Your personalized story has been saved!",
+        });
+        router.push(`/stories/${data.storyId}`);
+      }
     },
     onError: (error) => {
       toast({
@@ -353,7 +403,7 @@ export default function CreateStoryPage() {
                       id="pageCount"
                       type="number"
                       min={4}
-                      max={6}
+                      max={8}
                       className="h-14 text-lg rounded-xl border-2 focus:ring-4 focus:ring-primary/10"
                       placeholder="Auto"
                       value={pageCount ?? ""}
@@ -362,11 +412,11 @@ export default function CreateStoryPage() {
                         if (value === "") setPageCount(undefined);
                         else {
                           const num = parseInt(value);
-                          if (!isNaN(num) && num >= 4 && num <= 4) setPageCount(num);
+                          if (!isNaN(num) && num >= 4 && num <= 8) setPageCount(num);
                         }
                       }}
                     />
-                    <span className="text-muted-foreground font-bold whitespace-nowrap">Pages (4)</span>
+                    <span className="text-muted-foreground font-bold whitespace-nowrap">Pages (4-8)</span>
                   </div>
                 </div>
             </div>
@@ -375,7 +425,7 @@ export default function CreateStoryPage() {
           {/* Step 4: Generate */}
           {currentStep === 3 && (
             <div className="space-y-8 text-center">
-              {generateStoryMutation.isPending ? (
+              {generateStoryMutation.isPending || isPolling ? (
                 <div className="py-12 space-y-6">
                   <div className="flex justify-center">
                     <div className="relative">
@@ -385,10 +435,22 @@ export default function CreateStoryPage() {
                       </div>
                     </div>
                   </div>
-                  <h3 className="text-3xl font-black text-primary animate-pulse">Mixing the Magic...</h3>
+                  <h3 className="text-3xl font-black text-primary animate-pulse">
+                    {isPolling ? "Creating Your Story..." : "Starting..."}
+                  </h3>
                   <p className="text-xl text-muted-foreground font-medium">
-                    Our story fairies are painting the pictures and writing the words!
+                    {isPolling
+                      ? "This takes a few minutes. We'll notify you when it's ready!"
+                      : "Preparing to create your story..."}
                   </p>
+                  {isPolling && (
+                    <div className="max-w-xs mx-auto space-y-2">
+                      <Progress value={generationProgress} className="h-3" />
+                      <p className="text-sm text-muted-foreground">
+                        {generationProgress}% complete
+                      </p>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <>
@@ -433,7 +495,7 @@ export default function CreateStoryPage() {
       </Card>
 
       {/* Navigation Buttons */}
-      {!generateStoryMutation.isPending && (
+      {!generateStoryMutation.isPending && !isPolling && (
         <div className="flex justify-between items-center px-4">
           <Button
             variant="ghost"

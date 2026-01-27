@@ -47,3 +47,8 @@ export type Session = Prisma.SessionModel
  * 
  */
 export type VerificationToken = Prisma.VerificationTokenModel
+/**
+ * Model StoryJob
+ * 
+ */
+export type StoryJob = Prisma.StoryJobModel

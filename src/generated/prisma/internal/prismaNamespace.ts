@@ -389,7 +389,8 @@ export const ModelName = {
   Story: 'Story',
   Account: 'Account',
   Session: 'Session',
-  VerificationToken: 'VerificationToken'
+  VerificationToken: 'VerificationToken',
+  StoryJob: 'StoryJob'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -405,7 +406,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "child" | "story" | "account" | "session" | "verificationToken"
+    modelProps: "user" | "child" | "story" | "account" | "session" | "verificationToken" | "storyJob"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -853,6 +854,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    StoryJob: {
+      payload: Prisma.$StoryJobPayload<ExtArgs>
+      fields: Prisma.StoryJobFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.StoryJobFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoryJobPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.StoryJobFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoryJobPayload>
+        }
+        findFirst: {
+          args: Prisma.StoryJobFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoryJobPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.StoryJobFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoryJobPayload>
+        }
+        findMany: {
+          args: Prisma.StoryJobFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoryJobPayload>[]
+        }
+        create: {
+          args: Prisma.StoryJobCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoryJobPayload>
+        }
+        createMany: {
+          args: Prisma.StoryJobCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.StoryJobCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoryJobPayload>[]
+        }
+        delete: {
+          args: Prisma.StoryJobDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoryJobPayload>
+        }
+        update: {
+          args: Prisma.StoryJobUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoryJobPayload>
+        }
+        deleteMany: {
+          args: Prisma.StoryJobDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.StoryJobUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.StoryJobUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoryJobPayload>[]
+        }
+        upsert: {
+          args: Prisma.StoryJobUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StoryJobPayload>
+        }
+        aggregate: {
+          args: Prisma.StoryJobAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateStoryJob>
+        }
+        groupBy: {
+          args: Prisma.StoryJobGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StoryJobGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.StoryJobCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StoryJobCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -973,6 +1048,25 @@ export const VerificationTokenScalarFieldEnum = {
 } as const
 
 export type VerificationTokenScalarFieldEnum = (typeof VerificationTokenScalarFieldEnum)[keyof typeof VerificationTokenScalarFieldEnum]
+
+
+export const StoryJobScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  childId: 'childId',
+  moral: 'moral',
+  customSetting: 'customSetting',
+  customTheme: 'customTheme',
+  pageCount: 'pageCount',
+  status: 'status',
+  progress: 'progress',
+  storyId: 'storyId',
+  error: 'error',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StoryJobScalarFieldEnum = (typeof StoryJobScalarFieldEnum)[keyof typeof StoryJobScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1191,6 +1285,7 @@ export type GlobalOmitConfig = {
   account?: Prisma.AccountOmit
   session?: Prisma.SessionOmit
   verificationToken?: Prisma.VerificationTokenOmit
+  storyJob?: Prisma.StoryJobOmit
 }
 
 /* Types for Logging */

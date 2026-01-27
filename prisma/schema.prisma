@@ -85,3 +85,19 @@ model VerificationToken {
 
   @@unique([identifier, token])
 }
+
+model StoryJob {
+  id        String   @id @default(uuid())
+  userId    String
+  childId   String
+  moral     String
+  customSetting String?
+  customTheme  String?
+  pageCount Int
+  status    String   @default("processing") // "processing", "complete", "failed"
+  progress  Int      @default(0)
+  storyId   String?
+  error     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
