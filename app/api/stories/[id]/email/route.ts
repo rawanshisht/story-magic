@@ -6,7 +6,14 @@ import { generatePDFForEmail } from "@/lib/pdf-generator-email";
 import { getMoralById } from "@/config/morals";
 import { StoryPage } from "@/types";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy initialization to avoid build-time errors when API key is not set
+let _resend: Resend | null = null;
+function getResendClient(): Resend {
+  if (!_resend) {
+    _resend = new Resend(process.env.RESEND_API_KEY);
+  }
+  return _resend;
+}
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -92,7 +99,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     // Send email with PDF attachment
     console.log("[Email] Sending email to:", email);
     const emailStart = Date.now();
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResendClient().emails.send({
       from: process.env.RESEND_FROM_EMAIL || "Story Magic <onboarding@resend.dev>",
       to: email,
       subject: `Your Story: ${story.title}`,

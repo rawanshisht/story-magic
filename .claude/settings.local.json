@@ -24,7 +24,15 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(/api/auth/sync-user\" because the Prisma client wasn''t generated before\nnext build ran.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(tree:*)",
+      "Bash(git checkout:*)",
+      "Bash(npm install:*)",
+      "Bash(npx prisma migrate:*)",
+      "Bash(git reset:*)",
+      "Bash(git merge:*)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)"
     ]
   }
 }
