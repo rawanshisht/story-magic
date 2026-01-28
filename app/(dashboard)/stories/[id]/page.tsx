@@ -1,9 +1,9 @@
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import prisma from "@/lib/prisma";
-import { StoryPreview } from "@/components/story/StoryPreview";
+import { StoryViewClient } from "./story-view-client";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CheckCircle, BookOpen } from "lucide-react";
+import { ArrowLeft, CheckCircle } from "lucide-react";
 import { StoryPage } from "@/types";
 import { DeleteStoryButton } from "./delete-button";
 import { formatDate } from "@/lib/utils";
@@ -67,7 +67,7 @@ export default async function StoryViewPage({ params }: StoryPageProps) {
         </div>
       </div>
 
-      <StoryPreview title={story.title} pages={content} storyId={story.id} />
+      <StoryViewClient title={story.title} pages={content} storyId={story.id} />
     </div>
   );
 }

@@ -283,9 +283,11 @@ REMEMBER: This is part of a ${parsedStory.pages.length}-page story. The main cha
   const imageResults = await processWithConcurrency(
     pagePrompts,
     async ({ page, prompt }) => {
-      console.log(`[Image Generation] Generating image for page ${page.pageNumber}...`);
+      const pageStart = Date.now();
+      console.log(`[Image Generation] [${pageStart - startTime}ms] Starting page ${page.pageNumber}...`);
       const url = await generateIllustration(prompt);
-      console.log(`[Image Generation] Page ${page.pageNumber} image generated`);
+      const pageEnd = Date.now();
+      console.log(`[Image Generation] [${pageEnd - startTime}ms] Page ${page.pageNumber} done (took ${pageEnd - pageStart}ms)`);
       return { pageNumber: page.pageNumber, url };
     },
     5 // Max 5 concurrent image generations
@@ -339,9 +341,11 @@ REMEMBER: This is part of a ${parsedStory.pages.length}-page story. The main cha
   const downloadResults = await processWithConcurrency(
     successfulImages,
     async ({ pageNumber, url }) => {
-      console.log(`[Image Generation] Downloading image for page ${pageNumber}...`);
+      const dlStart = Date.now();
+      console.log(`[Image Generation] [${dlStart - startTime}ms] Starting download for page ${pageNumber}...`);
       const base64 = await downloadImageAsBase64(url);
-      console.log(`[Image Generation] Page ${pageNumber} image downloaded`);
+      const dlEnd = Date.now();
+      console.log(`[Image Generation] [${dlEnd - startTime}ms] Page ${pageNumber} downloaded (took ${dlEnd - dlStart}ms)`);
       return { pageNumber, url, base64 };
     },
     5 // Max 5 concurrent downloads

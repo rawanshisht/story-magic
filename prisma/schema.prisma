@@ -48,6 +48,7 @@ model Story {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   pageCount Int
+  cachedPdf Bytes?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

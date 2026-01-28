@@ -9,7 +9,7 @@ import {
   type ImageOptimizationConfig,
   getImageSizeInfo,
 } from "@/lib/image-optimizer";
-import { generatePDF } from "@/lib/pdf-generator";
+import { generatePDFForEmail } from "@/lib/pdf-generator-email";
 
 // Zod schema for validating StoryPage content
 const StoryPageSchema = z.object({
@@ -57,6 +57,17 @@ async function ensureImageBase64(page: StoryPage): Promise<StoryPage> {
   return page;
 }
 
+// Cache PDF to database asynchronously (fire and forget)
+function cachePdfAsync(storyId: string, pdfBuffer: Buffer): void {
+  prisma.story
+    .update({
+      where: { id: storyId },
+      data: { cachedPdf: pdfBuffer },
+    })
+    .then(() => console.log("[PDF] Cached to database"))
+    .catch((err) => console.error("[PDF] Failed to cache:", err));
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -69,20 +80,47 @@ export default async function handler(
   }
 
   try {
-    console.log("[PDF] Generation started for story: " + id);
+    console.log("[PDF] Request for story: " + id);
 
-    // Fetch story from database
+    // First, check if cached PDF exists (without fetching the large blob)
+    const cacheCheck = await prisma.story.findUnique({
+      where: { id: id as string },
+      select: { id: true, title: true, cachedPdf: true },
+    });
+
+    if (!cacheCheck) {
+      console.log("[PDF] Story not found: " + id);
+      return res.status(404).json({ error: "Story not found", storyId: id });
+    }
+
+    // Return cached PDF if available
+    if (cacheCheck.cachedPdf) {
+      const duration = Date.now() - startTime;
+      console.log("[PDF] Returning cached PDF in " + duration + "ms");
+
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        "attachment; filename=\"" + cacheCheck.title.replace(/[^a-z0-9]/gi, "_") + ".pdf\""
+      );
+      res.setHeader("Content-Length", cacheCheck.cachedPdf.length.toString());
+      res.setHeader("X-Debug-Time", duration.toString());
+      res.setHeader("X-Debug-Cached", "true");
+
+      return res.send(Buffer.from(cacheCheck.cachedPdf));
+    }
+
+    // No cache - fetch full story data for generation
     const story = await prisma.story.findUnique({
       where: { id: id as string },
       include: { child: true },
     });
 
     if (!story) {
-      console.log("[PDF] Story not found: " + id);
-      return res.status(404).json({ error: "Story not found", storyId: id });
+      return res.status(404).json({ error: "Story not found" });
     }
 
-    console.log("[PDF] Story found: " + story.title);
+    console.log("[PDF] No cache, generating for: " + story.title);
 
     // Validate and parse the JSON content using Zod
     const rawContent = story.content as unknown;
@@ -115,9 +153,9 @@ export default async function handler(
     const moral = getMoralById(story.moral);
     console.log("[PDF] Moral: " + (moral?.label || story.moral));
 
-    // Generate PDF using pdfkit
-    console.log("[PDF] Starting PDF generation with pdfkit...");
-    const pdfBuffer = await generatePDF({
+    // Generate PDF using pdf-lib (faster than pdfkit)
+    console.log("[PDF] Starting PDF generation with pdf-lib...");
+    const pdfBuffer = await generatePDFForEmail({
       title: story.title,
       childName: story.child.name,
       moral: moral?.label || story.moral,
@@ -127,6 +165,9 @@ export default async function handler(
     const pdfSizeKB = (pdfBuffer.length / 1024).toFixed(2);
     const duration = Date.now() - startTime;
     console.log("[PDF] PDF generated: " + pdfSizeKB + " KB in " + duration + "ms");
+
+    // Cache PDF asynchronously (don't wait)
+    cachePdfAsync(id as string, pdfBuffer);
 
     // Return PDF
     res.setHeader("Content-Type", "application/pdf");

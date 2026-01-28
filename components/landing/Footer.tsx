@@ -60,7 +60,7 @@ export function Footer() {
 
         <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
           <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} Story Magic. All rights reserved.
+            &copy; {new Date().getFullYear()} Story Magic. All rights reserved. Developed By Rawan A. ElShishtawy
           </p>
           <p className="text-sm text-muted-foreground">
             Made with love for families everywhere

@@ -1,7 +1,5 @@
 import PDFDocument from "pdfkit";
 import { StoryPage } from "@/types";
-import path from "path";
-import fs from "fs";
 
 interface PDFGeneratorOptions {
   title: string;
@@ -26,6 +24,7 @@ export async function generatePDF(options: PDFGeneratorOptions): Promise<Buffer>
         size: "A4",
         margins: { top: 0, bottom: 0, left: 0, right: 0 },
         autoFirstPage: false,
+        font: "Times-Roman",
         info: {
           Title: options.title,
           Author: "Story Magic",
@@ -40,6 +39,7 @@ export async function generatePDF(options: PDFGeneratorOptions): Promise<Buffer>
 
       // Cover Page
       doc.addPage();
+      doc.font("Times-Roman");
       createCoverPage(doc, options);
 
       // Story Pages
@@ -204,14 +204,14 @@ function createEndPage(doc: PDFKit.PDFDocument, options: PDFGeneratorOptions): v
 
 export async function createSimplePDF(text: string): Promise<Buffer> {
   return new Promise((resolve, reject) => {
-    const doc = new PDFDocument();
+    const doc = new PDFDocument({ font: "Times-Roman" });
     const chunks: Buffer[] = [];
-    
+
     doc.on("data", (chunk) => chunks.push(chunk));
     doc.on("end", () => resolve(Buffer.concat(chunks)));
     doc.on("error", reject);
-    
-    doc.text(text, 100, 100);
+
+    doc.font("Times-Roman").text(text, 100, 100);
     doc.end();
   });
 }

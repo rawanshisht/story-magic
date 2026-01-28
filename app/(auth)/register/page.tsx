@@ -59,6 +59,7 @@ export default function RegisterPage() {
         title: "Success",
         description: "Account created successfully!",
       });
+      router.push("/dashboard");
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Failed to create account";
       toast({
@@ -75,6 +76,7 @@ export default function RegisterPage() {
     setIsLoading(true);
     try {
       await signInWithGoogle();
+      router.push("/dashboard");
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Failed to sign in with Google";
       toast({

@@ -1,11 +1,8 @@
 /**
  * Image optimization utilities for PDF generation
- * 
- * For full image compression, consider adding 'sharp' package:
- * npm install sharp
- * npm install -D @types/sharp
  */
 
+import sharp from "sharp";
 import { downloadImageAsBase64 } from "./openai";
 
 // Configuration for PDF image optimization
@@ -73,11 +70,7 @@ function getImageDimensions(base64Data: string): { width: number; height: number
 }
 
 /**
- * Compress image by reducing quality (basic implementation)
- * Note: For full compression with resizing, install 'sharp' package
- * 
- * This is a lightweight implementation that provides basic compression
- * For optimal results, use the sharp-based implementation below
+ * Compress image using sharp - resize and convert to JPEG
  */
 export async function compressImage(
   imageData: string,
@@ -87,14 +80,28 @@ export async function compressImage(
     return imageData;
   }
 
-  const { mimeType, base64Data, isValid } = parseDataUrl(imageData);
+  const { base64Data, isValid } = parseDataUrl(imageData);
   if (!isValid) {
     return imageData;
   }
 
-  // For now, return original if no sharp installation
-  // This provides structure for future optimization
-  return imageData;
+  try {
+    const imageBuffer = Buffer.from(base64Data, "base64");
+
+    // Resize and convert to JPEG with quality setting
+    const compressed = await sharp(imageBuffer)
+      .resize(config.maxWidth, config.maxHeight, {
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .jpeg({ quality: config.quality })
+      .toBuffer();
+
+    return `data:image/jpeg;base64,${compressed.toString("base64")}`;
+  } catch (error) {
+    console.warn("Image compression failed, using original:", error);
+    return imageData;
+  }
 }
 
 /**

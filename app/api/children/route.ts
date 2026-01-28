@@ -67,10 +67,10 @@ export async function POST(request: Request) {
         name,
         age: parseInt(age),
         gender,
-        skinTone: skinTone || null,
-        eyeColor: eyeColor || null,
-        hairColor: hairColor || null,
-        hairStyle: hairStyle || null,
+        skinTone: skinTone || "fair",
+        eyeColor: eyeColor || "brown",
+        hairColor: hairColor || "black",
+        hairStyle: hairStyle || "short",
         interests: typeof interests === 'string'
           ? interests.split(',').map((i: string) => i.trim()).filter((i: string) => i.length > 0)
           : Array.isArray(interests) ? interests : [],

@@ -40,6 +40,21 @@ const STEPS = [
   { id: "generate", title: "Ready!", description: "Create your magical story" },
 ];
 
+const LOADING_MESSAGES = [
+  { title: "Sprinkling magic dust...", subtitle: "The fairies are getting creative!" },
+  { title: "Painting the pictures...", subtitle: "Our artists are working their magic!" },
+  { title: "Writing the adventure...", subtitle: "The storytellers are inspired!" },
+  { title: "Adding sparkles...", subtitle: "Making everything extra special!" },
+  { title: "Brewing imagination...", subtitle: "The wizards are casting spells!" },
+  { title: "Gathering stardust...", subtitle: "Collecting the best ideas!" },
+  { title: "Mixing colors...", subtitle: "Creating beautiful illustrations!" },
+  { title: "Weaving the tale...", subtitle: "Every word is carefully chosen!" },
+  { title: "Summoning creativity...", subtitle: "The muses are singing!" },
+  { title: "Crafting magic moments...", subtitle: "Building unforgettable scenes!" },
+  { title: "Polishing the pages...", subtitle: "Making everything shine!" },
+  { title: "Adding the finishing touches...", subtitle: "Almost ready for you!" },
+];
+
 export default function CreateStoryPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -56,6 +71,7 @@ export default function CreateStoryPage() {
   const [jobId, setJobId] = useState<string | null>(null);
   const [generationProgress, setGenerationProgress] = useState(0);
   const [isPolling, setIsPolling] = useState(false);
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
 
   // Poll for job status
   useEffect(() => {
@@ -241,6 +257,20 @@ export default function CreateStoryPage() {
       });
     },
   });
+
+  // Cycle through loading messages during generation
+  useEffect(() => {
+    if (!isPolling && !generateStoryMutation.isPending) {
+      setLoadingMessageIndex(0);
+      return;
+    }
+
+    const messageInterval = setInterval(() => {
+      setLoadingMessageIndex((prev) => (prev + 1) % LOADING_MESSAGES.length);
+    }, 3000);
+
+    return () => clearInterval(messageInterval);
+  }, [isPolling, generateStoryMutation.isPending]);
 
   const canProceed = () => {
     switch (currentStep) {
@@ -459,14 +489,14 @@ export default function CreateStoryPage() {
                       </div>
                     </div>
                   </div>
-                  <h3 className="text-3xl font-black text-primary animate-pulse">
-                    {isPolling ? "Creating Your Story..." : "Starting..."}
-                  </h3>
-                  <p className="text-xl text-muted-foreground font-medium">
-                    {isPolling
-                      ? "This takes a few minutes. We'll notify you when it's ready!"
-                      : "Preparing to create your story..."}
-                  </p>
+                  <div className="space-y-2 transition-all duration-500">
+                    <h3 className="text-3xl font-black text-primary animate-pulse">
+                      {LOADING_MESSAGES[loadingMessageIndex].title}
+                    </h3>
+                    <p className="text-xl text-muted-foreground font-medium">
+                      {LOADING_MESSAGES[loadingMessageIndex].subtitle}
+                    </p>
+                  </div>
                   {isPolling && (
                     <div className="max-w-xs mx-auto space-y-2">
                       <Progress value={generationProgress} className="h-3" />

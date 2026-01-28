@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { Navbar } from "@/components/shared/Navbar";
+import { Footer } from "@/components/landing/Footer";
 
 export default async function DashboardLayout({
   children,
@@ -15,9 +16,10 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-muted/30 flex flex-col">
       <Navbar />
-      <main className="container py-8">{children}</main>
+      <main className="container py-8 flex-1">{children}</main>
+      <Footer />
     </div>
   );
 }

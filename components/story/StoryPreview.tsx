@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ChevronLeft, ChevronRight, Download, Maximize2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Maximize2, Pencil, Save, X, Volume2, Loader2, Mail } from "lucide-react";
 import { StoryPage } from "@/types";
 import { cn } from "@/lib/utils";
 import { ImageViewer } from "./ImageViewer";
@@ -14,14 +14,117 @@ interface StoryPreviewProps {
   title: string;
   pages: StoryPage[];
   storyId: string;
+  onSave?: (pages: StoryPage[]) => Promise<void>;
+  onEmailClick?: () => void;
 }
 
-export function StoryPreview({ title, pages, storyId }: StoryPreviewProps) {
+const CACHE_KEY_PREFIX = "story-edit-";
+
+type CachedText = { pageNumber: number; text: string }[];
+
+function getCachedTexts(storyId: string): CachedText | null {
+  try {
+    const cached = localStorage.getItem(CACHE_KEY_PREFIX + storyId);
+    if (cached) return JSON.parse(cached);
+  } catch {}
+  return null;
+}
+
+function setCachedTexts(storyId: string, pages: StoryPage[]) {
+  try {
+    // Only cache text to keep localStorage small (no imageBase64)
+    const textsOnly = pages.map((p) => ({ pageNumber: p.pageNumber, text: p.text }));
+    localStorage.setItem(CACHE_KEY_PREFIX + storyId, JSON.stringify(textsOnly));
+  } catch {}
+}
+
+function clearCachedPages(storyId: string) {
+  try {
+    localStorage.removeItem(CACHE_KEY_PREFIX + storyId);
+  } catch {}
+}
+
+export function StoryPreview({ title, pages, storyId, onSave, onEmailClick }: StoryPreviewProps) {
   const [currentPage, setCurrentPage] = useState(0);
   const [isFullscreenViewerOpen, setIsFullscreenViewerOpen] = useState(false);
+  const [editedPages, setEditedPages] = useState<StoryPage[]>(pages);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isDownloadingAudio, setIsDownloadingAudio] = useState(false);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+
+  // Initialize from localStorage cache or props
+  useEffect(() => {
+    const cachedTexts = getCachedTexts(storyId);
+    if (cachedTexts) {
+      // Merge cached text edits with original pages (preserves images)
+      const merged = pages.map((page) => {
+        const cached = cachedTexts.find((c) => c.pageNumber === page.pageNumber);
+        return cached ? { ...page, text: cached.text } : page;
+      });
+      setEditedPages(merged);
+      setHasUnsavedChanges(true);
+      setIsEditing(true);
+    } else {
+      setEditedPages(pages);
+    }
+  }, [storyId, pages]);
+
+  const handleTextChange = useCallback((pageIndex: number, newText: string) => {
+    setEditedPages((prev) => {
+      const updated = prev.map((p, i) =>
+        i === pageIndex ? { ...p, text: newText } : p
+      );
+      setCachedTexts(storyId, updated);
+      return updated;
+    });
+    setHasUnsavedChanges(true);
+  }, [storyId]);
+
+  const handleSave = async () => {
+    if (!onSave) return;
+    setIsSaving(true);
+    try {
+      await onSave(editedPages);
+      clearCachedPages(storyId);
+      setHasUnsavedChanges(false);
+      setIsEditing(false);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setEditedPages(pages);
+    clearCachedPages(storyId);
+    setHasUnsavedChanges(false);
+    setIsEditing(false);
+  };
+
+  const handleDownloadAudio = async () => {
+    setIsDownloadingAudio(true);
+    try {
+      const response = await fetch(`/api/stories/${storyId}/audio`);
+      if (!response.ok) throw new Error("Failed to generate audio");
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${title.replace(/[^a-zA-Z0-9 ]/g, "").trim()}.mp3`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Audio download error:", error);
+    } finally {
+      setIsDownloadingAudio(false);
+    }
+  };
 
   const goToNextPage = () => {
-    if (currentPage < pages.length - 1) {
+    if (currentPage < editedPages.length - 1) {
       setCurrentPage(currentPage + 1);
     }
   };
@@ -33,10 +136,27 @@ export function StoryPreview({ title, pages, storyId }: StoryPreviewProps) {
   };
 
   const handleDownload = async () => {
-    window.open(`/api/stories/${storyId}/pdf`, "_blank");
+    setIsDownloadingPdf(true);
+    try {
+      const response = await fetch(`/api/stories/${storyId}/pdf`);
+      if (!response.ok) throw new Error("Failed to generate PDF");
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${title.replace(/[^a-zA-Z0-9 ]/g, "").trim()}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("PDF download error:", error);
+    } finally {
+      setIsDownloadingPdf(false);
+    }
   };
 
-  const page = pages[currentPage];
+  const page = editedPages[currentPage];
 
   return (
     <>
@@ -59,8 +179,8 @@ export function StoryPreview({ title, pages, storyId }: StoryPreviewProps) {
           </Button>
 
           <Card className="book-page w-full max-w-2xl overflow-hidden shadow-2xl transition-all hover:shadow-primary/10 border-4 border-primary/20 rounded-[2.5rem]">
-            <div 
-              className="relative aspect-square w-full bg-muted group cursor-zoom-in" 
+            <div
+              className="relative aspect-square w-full bg-muted group cursor-zoom-in"
               onClick={() => setIsFullscreenViewerOpen(true)}
             >
               {page?.imageUrl && page.imageUrl !== "/placeholder-illustration.svg" ? (
@@ -83,13 +203,21 @@ export function StoryPreview({ title, pages, storyId }: StoryPreviewProps) {
             <div className="p-8 md:p-10 space-y-6 bg-white relative">
               <div className="flex justify-center mb-2">
                  <span className="bg-primary/10 text-primary px-4 py-1 rounded-full text-sm font-black uppercase tracking-widest">
-                   Page {currentPage + 1} of {pages.length}
+                   Page {currentPage + 1} of {editedPages.length}
                  </span>
               </div>
-              <p className="text-2xl md:text-3xl leading-relaxed text-center font-bold text-foreground/90">
-                {page?.text}
-              </p>
-              {page?.text && (
+              {isEditing ? (
+                <textarea
+                  value={page?.text || ""}
+                  onChange={(e) => handleTextChange(currentPage, e.target.value)}
+                  className="w-full min-h-[150px] text-xl md:text-2xl leading-relaxed text-center font-bold text-foreground/90 bg-primary/5 border-2 border-primary/20 rounded-2xl p-4 resize-y focus:outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10"
+                />
+              ) : (
+                <p className="text-2xl md:text-3xl leading-relaxed text-center font-bold text-foreground/90">
+                  {page?.text}
+                </p>
+              )}
+              {page?.text && !isEditing && (
                 <div className="flex justify-center pt-4">
                   <AudioPlayer text={page.text} />
                 </div>
@@ -101,12 +229,12 @@ export function StoryPreview({ title, pages, storyId }: StoryPreviewProps) {
             variant="ghost"
             size="icon"
             onClick={goToNextPage}
-            disabled={currentPage === pages.length - 1}
+            disabled={currentPage === editedPages.length - 1}
             className="hidden lg:flex h-20 w-20 rounded-full shadow-xl bg-background/80 backdrop-blur hover:scale-110 transition-all shrink-0 border-4 border-primary/10"
           >
             <ChevronRight className="h-10 w-10 text-primary" strokeWidth={3} />
           </Button>
-          
+
           {/* Mobile/Tablet Navigation Overlays */}
           <div className="absolute inset-y-0 left-4 flex items-center lg:hidden">
              {currentPage > 0 && (
@@ -116,13 +244,57 @@ export function StoryPreview({ title, pages, storyId }: StoryPreviewProps) {
              )}
           </div>
           <div className="absolute inset-y-0 right-4 flex items-center lg:hidden">
-             {currentPage < pages.length - 1 && (
+             {currentPage < editedPages.length - 1 && (
                <Button variant="secondary" size="icon" onClick={goToNextPage} className="h-12 w-12 rounded-full shadow-lg">
                  <ChevronRight className="h-8 w-8" />
                </Button>
              )}
           </div>
         </div>
+
+        {/* Edit Controls */}
+        {onSave && (
+          <div className="flex flex-wrap justify-center gap-4">
+            {isEditing ? (
+              <>
+                <Button
+                  variant="default"
+                  size="lg"
+                  className="rounded-full h-14 px-8 text-lg shadow-lg"
+                  onClick={handleSave}
+                  disabled={isSaving || !hasUnsavedChanges}
+                >
+                  {isSaving ? (
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  ) : (
+                    <Save className="mr-2 h-5 w-5" />
+                  )}
+                  {isSaving ? "Saving..." : "Save Changes"}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="rounded-full h-14 px-8 text-lg border-2"
+                  onClick={handleCancel}
+                  disabled={isSaving}
+                >
+                  <X className="mr-2 h-5 w-5" />
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              <Button
+                variant="outline"
+                size="lg"
+                className="rounded-full h-14 px-8 text-lg border-2"
+                onClick={() => setIsEditing(true)}
+              >
+                <Pencil className="mr-2 h-5 w-5" />
+                Edit Text
+              </Button>
+            )}
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div className="flex flex-wrap justify-center gap-6">
@@ -135,21 +307,51 @@ export function StoryPreview({ title, pages, storyId }: StoryPreviewProps) {
             <Maximize2 className="mr-3 h-6 w-6" />
             Full Screen!
           </Button>
-          <Button 
-            size="lg" 
-            className="rounded-full h-16 px-10 text-lg shadow-lg" 
+          <Button
+            size="lg"
+            className="rounded-full h-16 px-10 text-lg shadow-lg"
             onClick={handleDownload}
+            disabled={isDownloadingPdf}
           >
-            <Download className="mr-3 h-6 w-6" />
-            Download PDF
+            {isDownloadingPdf ? (
+              <Loader2 className="mr-3 h-6 w-6 animate-spin" />
+            ) : (
+              <Download className="mr-3 h-6 w-6" />
+            )}
+            {isDownloadingPdf ? "Generating PDF..." : "Download PDF"}
           </Button>
+          <Button
+            variant="outline"
+            size="lg"
+            className="rounded-full h-16 px-10 text-lg border-4"
+            onClick={handleDownloadAudio}
+            disabled={isDownloadingAudio}
+          >
+            {isDownloadingAudio ? (
+              <Loader2 className="mr-3 h-6 w-6 animate-spin" />
+            ) : (
+              <Volume2 className="mr-3 h-6 w-6" />
+            )}
+            {isDownloadingAudio ? "Generating Audio..." : "Download Audio"}
+          </Button>
+          {onEmailClick && (
+            <Button
+              variant="outline"
+              size="lg"
+              className="rounded-full h-16 px-10 text-lg border-4"
+              onClick={onEmailClick}
+            >
+              <Mail className="mr-3 h-6 w-6" />
+              Send by Email
+            </Button>
+          )}
         </div>
       </div>
 
       {/* Full Screen Image Viewer */}
       {isFullscreenViewerOpen && (
         <ImageViewer
-          pages={pages}
+          pages={editedPages}
           initialPage={currentPage}
           onClose={() => setIsFullscreenViewerOpen(false)}
           storyId={storyId}

@@ -80,11 +80,14 @@ export async function generateIllustration(prompt: string): Promise<string> {
   try {
     const response = await openai.images.generate({
       model: "gpt-image-1",
-      prompt: `Children's book watercolor illustration. NO TEXT OR WORDS anywhere in the image. Soft brushstrokes, delicate watercolor style.
+      prompt: `Children's book watercolor illustration. Soft brushstrokes, delicate watercolor style.
 
 ${prompt}
 
-IMPORTANT: Do not include any text, letters, words, or writing in the image.`,
+CRITICAL REQUIREMENTS:
+- ABSOLUTELY NO TEXT, letters, words, numbers, signs, labels, captions, titles, or any written content anywhere in the image
+- No speech bubbles, no banners, no signs with writing
+- Pure illustration only - let the visuals tell the story without any text elements`,
       size: "1024x1024",
       quality: "medium",
     });
