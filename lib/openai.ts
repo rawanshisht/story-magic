@@ -45,7 +45,7 @@ export async function downloadImageAsBase64(url: string): Promise<string> {
 export async function generateSpeech(input: string): Promise<ArrayBuffer> {
   const mp3 = await openai.audio.speech.create({
     model: "tts-1",
-    voice: "nova",
+    voice: "coral",
     input: input,
     speed: 0.85,
   });
