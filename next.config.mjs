@@ -12,6 +12,8 @@ const nextConfig = {
       },
     ],
   },
+  // Handle native modules for serverless
+  serverExternalPackages: ["sharp"],
 };
 
 export default nextConfig;
