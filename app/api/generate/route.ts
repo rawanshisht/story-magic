@@ -4,6 +4,8 @@ import prisma from "@/lib/prisma";
 import { generateStory } from "@/lib/story-generator";
 import { Child } from "@/types";
 
+export const maxDuration = 300;
+
 export async function POST(request: Request) {
   try {
     const userId = await getAuthenticatedUserId();
@@ -54,27 +56,59 @@ export async function POST(request: Request) {
       createdAt: childData.createdAt,
     };
 
-    const generatedStory = await generateStory(
-      child,
-      moral,
-      customSetting,
-      customTheme,
-      4
-    );
+    const effectivePageCount = pageCount || 4;
 
-    const story = await prisma.story.create({
-      data: {
-        title: generatedStory.title,
+    // In development, process inline since Netlify background functions aren't available
+    if (process.env.NODE_ENV === "development") {
+      console.log("[Generate] Processing story inline (dev mode)...");
+
+      const generatedStory = await generateStory(
+        child,
         moral,
-        content: JSON.parse(JSON.stringify(generatedStory.pages)),
-        childId,
+        customSetting || undefined,
+        customTheme || undefined,
+        effectivePageCount
+      );
+
+      const story = await prisma.story.create({
+        data: {
+          title: generatedStory.title,
+          moral,
+          content: JSON.parse(JSON.stringify(generatedStory.pages)),
+          childId,
+          userId,
+          pageCount: generatedStory.pages.length,
+        },
+        include: { child: true },
+      });
+
+      console.log(`[Generate] Story created: ${story.id}`);
+
+      return NextResponse.json({
+        success: true,
+        storyId: story.id,
+      });
+    }
+
+    // In production, create a job for Netlify background function processing
+    const job = await prisma.storyJob.create({
+      data: {
         userId,
-        pageCount: generatedStory.pages.length,
+        childId,
+        moral,
+        customSetting: customSetting || null,
+        customTheme: customTheme || null,
+        pageCount: effectivePageCount,
+        status: "processing",
+        progress: 0,
       },
-      include: { child: true },
     });
 
-    return NextResponse.json(story);
+    return NextResponse.json({
+      success: true,
+      jobId: job.id,
+      message: "Story generation started in the background"
+    });
   } catch (error) {
     console.error("Error generating story:", error);
     if (error instanceof Error) {

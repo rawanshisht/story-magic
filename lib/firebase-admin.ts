@@ -14,6 +14,9 @@ const adminAuth = getAuth(adminApp);
 
 interface TokenCacheEntry {
   uid: string;
+  email?: string;
+  name?: string;
+  picture?: string;
   expiry: number;
 }
 
@@ -24,13 +27,16 @@ export async function verifyFirebaseToken(token: string) {
   try {
     const cached = tokenCache.get(token);
     if (cached && Date.now() < cached.expiry) {
-      return { uid: cached.uid };
+      return { uid: cached.uid, email: cached.email, name: cached.name, picture: cached.picture };
     }
 
     const decodedToken = await adminAuth.verifyIdToken(token);
-    
+
     tokenCache.set(token, {
       uid: decodedToken.uid,
+      email: decodedToken.email,
+      name: decodedToken.name,
+      picture: decodedToken.picture,
       expiry: Date.now() + TOKEN_CACHE_TTL,
     });
 
@@ -46,6 +52,20 @@ export async function verifyFirebaseToken(token: string) {
       }
     }
     console.error("Error verifying Firebase token:", error);
+    return null;
+  }
+}
+
+export async function getFirebaseUser(uid: string) {
+  try {
+    const userRecord = await adminAuth.getUser(uid);
+    return {
+      email: userRecord.email,
+      displayName: userRecord.displayName,
+      photoURL: userRecord.photoURL,
+    };
+  } catch (error) {
+    console.error("[Firebase Admin] Failed to get user:", error);
     return null;
   }
 }

@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -28,9 +27,9 @@ model Child {
   name      String
   age       Int
   gender    String
-  skinTone  String
-  eyeColor  String
-  hairColor String
+  skinTone  String?
+  eyeColor  String?
+  hairColor String?
   hairStyle String?
   interests String[]
   userId    String

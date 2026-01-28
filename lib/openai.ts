@@ -1,78 +1,8 @@
 import OpenAI from "openai";
-import fs from "fs/promises";
-import path from "path";
 
 export const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-
-// Directory for saving generated images for manual review
-const REVIEW_IMAGES_DIR = path.join(process.cwd(), "generated-images-review");
-
-/**
- * Save an image to the review folder for manual inspection
- */
-export async function saveImageForReview(
-  base64Data: string,
-  storyFolder: string,
-  pageNumber: number,
-  metadata?: { title?: string; childName?: string; moral?: string }
-): Promise<string> {
-  try {
-    const storyDir = path.join(REVIEW_IMAGES_DIR, storyFolder);
-
-    // Ensure directory exists
-    await fs.mkdir(storyDir, { recursive: true });
-
-    // Extract the actual base64 data (remove data:image/png;base64, prefix)
-    const base64Content = base64Data.replace(/^data:image\/\w+;base64,/, "");
-    const buffer = Buffer.from(base64Content, "base64");
-
-    // Save the image
-    const filename = `page-${String(pageNumber).padStart(2, "0")}.png`;
-    const filepath = path.join(storyDir, filename);
-    await fs.writeFile(filepath, buffer);
-
-    // Save metadata file on first page
-    if (pageNumber === 1 && metadata) {
-      const metadataPath = path.join(storyDir, "metadata.json");
-      await fs.writeFile(
-        metadataPath,
-        JSON.stringify(
-          {
-            ...metadata,
-            generatedAt: new Date().toISOString(),
-            folder: storyFolder,
-          },
-          null,
-          2
-        )
-      );
-    }
-
-    console.log(`[Image Review] Saved: ${filepath}`);
-    return filepath;
-  } catch (error) {
-    console.error("[Image Review] Failed to save image:", error);
-    throw error;
-  }
-}
-
-/**
- * Generate a unique folder name for a story
- */
-export function generateStoryFolderName(title: string, childName: string): string {
-  const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-  const sanitizedTitle = title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .slice(0, 30);
-  const sanitizedChildName = childName
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .slice(0, 15);
-  return `${timestamp}_${sanitizedChildName}_${sanitizedTitle}`;
-}
 
 // Download image from URL and convert to base64
 export async function downloadImageAsBase64(url: string): Promise<string> {
@@ -155,28 +85,17 @@ export async function generateIllustration(prompt: string): Promise<string> {
 ${prompt}
 
 IMPORTANT: Do not include any text, letters, words, or writing in the image.`,
-      n: 1,
       size: "1024x1024",
       quality: "medium",
-      output_format: "png",
     });
 
-    console.log(`[OpenAI Image] Response received:`, JSON.stringify({
-      hasData: !!response.data,
-      dataLength: response.data?.length,
-    }, null, 2));
-
     const b64 = response.data?.[0]?.b64_json;
-    const url = response.data?.[0]?.url;
 
     if (b64) {
       console.log(`[OpenAI Image] Received base64 data (length: ${b64.length})`);
       return `data:image/png;base64,${b64}`;
-    } else if (url) {
-      console.log(`[OpenAI Image] Received URL`);
-      return url;
     } else {
-      console.error(`[OpenAI Image] No base64 or URL in response`);
+      console.error(`[OpenAI Image] No base64 data in response`);
       return "";
     }
   } catch (error) {

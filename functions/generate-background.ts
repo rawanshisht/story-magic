@@ -1,32 +1,16 @@
 import { Handler, HandlerEvent, HandlerContext } from "@netlify/functions";
-import { PrismaClient } from "@prisma/client";
-import { Child, StoryPage } from "../app/types";
-import { getAgeSettings } from "../app/config/age-settings";
-import { getMoralById } from "../app/config/morals";
+import prisma from "../lib/prisma";
+import { Child, StoryPage } from "../types";
+import { getAgeSettings } from "../config/age-settings";
+import { getMoralById } from "../config/morals";
 import {
   generateStoryText,
   generateIllustration,
   downloadImageAsBase64,
-} from "../app/lib/openai";
+} from "../lib/openai";
 
-const prisma = new PrismaClient();
-
-interface GenerateRequest {
-  userId: string;
-  childId: string;
-  moral: string;
-  customSetting?: string;
-  customTheme?: string;
-  pageCount?: number;
-}
-
-interface StoryJobData {
-  userId: string;
-  childId: string;
-  moral: string;
-  customSetting?: string;
-  customTheme?: string;
-  pageCount?: number;
+interface BackgroundRequest {
+  jobId: string;
 }
 
 async function updateJobProgress(
@@ -112,16 +96,16 @@ async function generateStory(
     const styleReference = buildStyleReference();
     const mood = getPageMood(pageNum, parsedStory.pages.length);
 
-    const prompt = `${styleReference}
-
-${characterReference}
-
-PAGE ${page.pageNumber} of ${parsedStory.pages.length}:
-Scene: ${page.text.slice(0, 250)}
-
-Mood: ${mood}
-
-REMEMBER: This is part of a ${parsedStory.pages.length}-page story. The main character ${child.name} MUST look exactly the same in this image.`;
+    const prompt = `${styleReference}` +
+`
+` + `${characterReference}` +
+`
+` + `PAGE ${page.pageNumber} of ${parsedStory.pages.length}:
+Scene: ${page.text.slice(0, 250)}` +
+`
+` + `Mood: ${mood}` +
+`
+` + `REMEMBER: This is part of a ${parsedStory.pages.length}-page story. The main character ${child.name} MUST look exactly the same in this image.`;
 
     const imageUrl = await generateIllustration(prompt);
     const base64 = await downloadImageAsBase64(imageUrl);
@@ -193,35 +177,35 @@ function buildStoryPrompt(
   const theme =
     customTheme || ageSettings.themes[Math.floor(Math.random() * ageSettings.themes.length)];
 
-  return `Write a children's story for a ${child.age}-year-old child.
-
-Main Character: ${characterDescription}
-
-Story Requirements:
-- Number of pages: ${pageCount}
-- Words per page: ${ageSettings.wordsPerPage.min}-${ageSettings.wordsPerPage.max} words
-- Vocabulary level: ${ageSettings.vocabulary}
-- Sentence structure: ${ageSettings.sentenceStructure}
-- Moral of the story: ${moralLabel} - ${moralDescription}
-- Setting: ${setting}
-- Theme: ${theme}
-
-Instructions:
-1. Make ${child.name} the main character who learns about ${moralLabel.toLowerCase()}
-2. Include ${child.name}'s interests (${child.interests.join(", ")}) naturally in the story
-3. Use engaging, age-appropriate language
-4. End with a clear but not preachy moral lesson
-
-Format your response EXACTLY as follows:
-TITLE: [Story Title]
-
-PAGE 1:
-[Text for page 1]
-
-PAGE 2:
-[Text for page 2]
-
-... and so on for all ${pageCount} pages.`;
+  return `Write a children's story for a ${child.age}-year-old child.` +
+`
+` + `Main Character: ${characterDescription}` +
+`
+` + `Story Requirements:` +
+`- Number of pages: ${pageCount}` +
+`- Words per page: ${ageSettings.wordsPerPage.min}-${ageSettings.wordsPerPage.max} words` +
+`- Vocabulary level: ${ageSettings.vocabulary}` +
+`- Sentence structure: ${ageSettings.sentenceStructure}` +
+`- Moral of the story: ${moralLabel} - ${moralDescription}` +
+`- Setting: ${setting}` +
+`- Theme: ${theme}` +
+`
+` + `Instructions:` +
+`1. Make ${child.name} the main character who learns about ${moralLabel.toLowerCase()}` +
+`2. Include ${child.name}'s interests (${child.interests.join(", ")}) naturally in the story` +
+`3. Use engaging, age-appropriate language` +
+`4. End with a clear but not preachy moral lesson` +
+`
+` + `Format your response EXACTLY as follows:` +
+`TITLE: [Story Title]` +
+`
+` + `PAGE 1:` +
+`[Text for page 1]` +
+`
+` + `PAGE 2:` +
+`[Text for page 2]` +
+`
+` + `... and so on for all ${pageCount} pages.`;
 }
 
 function parseStoryText(storyText: string, expectedPages: number) {
@@ -269,8 +253,8 @@ function parseStoryText(storyText: string, expectedPages: number) {
   return { title, pages: pages.slice(0, expectedPages) };
 }
 
-const handler: Handler = async (event: HandlerEvent, context: HandlerContext) => {
-  console.log("[Generate] Function started");
+export const handler: Handler = async (event: HandlerEvent, context: HandlerContext) => {
+  console.log("[Generate Background] Function started");
 
   if (event.httpMethod !== "POST") {
     return {
@@ -280,45 +264,35 @@ const handler: Handler = async (event: HandlerEvent, context: HandlerContext) =>
   }
 
   try {
-    const body: GenerateRequest = JSON.parse(event.body || "{}");
-    const { userId, childId, moral, customSetting, customTheme, pageCount } = body;
+    const body: BackgroundRequest = JSON.parse(event.body || "{}");
+    const { jobId } = body;
 
-    if (!userId || !childId || !moral) {
+    if (!jobId) {
+      console.error("[Generate Background] Missing jobId");
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: "Missing required fields" }),
+        body: JSON.stringify({ error: "Missing jobId" }),
       };
     }
 
-    const effectivePageCount = pageCount || 8;
-    if (effectivePageCount < 4 || effectivePageCount > 8) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: "Page count must be between 4 and 8" }),
-      };
-    }
-
-    const job = await prisma.storyJob.create({
-      data: {
-        userId,
-        childId,
-        moral,
-        customSetting,
-        customTheme,
-        pageCount: effectivePageCount,
-        status: "processing",
-        progress: 0,
-      },
+    const job = await prisma.storyJob.findUnique({
+      where: { id: jobId },
     });
 
-    console.log(`[Generate] Created job ${job.id}`);
+    if (!job) {
+      console.error(`[Generate Background] Job not found: ${jobId}`);
+      return {
+        statusCode: 404,
+        body: JSON.stringify({ error: "Job not found" }),
+      };
+    }
 
     const childData = await prisma.child.findUnique({
-      where: { id: childId, userId },
+      where: { id: job.childId },
     });
 
     if (!childData) {
-      await markJobFailed(job.id, "Child not found");
+      await markJobFailed(jobId, "Child not found");
       return {
         statusCode: 404,
         body: JSON.stringify({ error: "Child not found" }),
@@ -339,48 +313,57 @@ const handler: Handler = async (event: HandlerEvent, context: HandlerContext) =>
       createdAt: childData.createdAt,
     };
 
-    console.log("[Generate] Starting story generation...");
+    console.log(`[Generate Background] Starting generation for job ${jobId}`);
+    
+    // Convert nulls from DB to undefined
+    const customSetting = job.customSetting || undefined;
+    const customTheme = job.customTheme || undefined;
+    
     const generatedStory = await generateStory(
       child,
-      moral,
+      job.moral,
       customSetting,
       customTheme,
-      effectivePageCount,
+      job.pageCount,
       async (page, total) => {
         const progress = Math.round((page / total) * 100);
-        await updateJobProgress(job.id, progress);
-        console.log(`[Generate] Progress: ${progress}%`);
+        await updateJobProgress(jobId, progress);
+        console.log(`[Generate Background] Progress: ${progress}%`);
       }
     );
 
-    console.log("[Generate] Saving story to database...");
+    console.log("[Generate Background] Saving story to database...");
     const story = await prisma.story.create({
       data: {
         title: generatedStory.title,
-        moral,
+        moral: job.moral,
         content: JSON.parse(JSON.stringify(generatedStory.pages)),
-        childId,
-        userId,
+        childId: job.childId,
+        userId: job.userId,
         pageCount: generatedStory.pages.length,
       },
       include: { child: true },
     });
 
-    await markJobComplete(job.id, story.id);
+    await markJobComplete(jobId, story.id);
 
-    console.log(`[Generate] Story ${story.id} created successfully`);
+    console.log(`[Generate Background] Job ${jobId} completed. Story ${story.id} created.`);
 
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        success: true,
-        jobId: job.id,
-        storyId: story.id,
-        title: story.title,
-      }),
+      body: JSON.stringify({ success: true, storyId: story.id }),
     };
   } catch (error) {
-    console.error("[Generate] Error:", error);
+    console.error("[Generate Background] Error:", error);
+    
+    try {
+      const body: BackgroundRequest = JSON.parse(event.body || "{}");
+      if (body.jobId) {
+        await markJobFailed(body.jobId, error instanceof Error ? error.message : "Unknown error");
+      }
+    } catch (e) {
+      // Ignore
+    }
 
     return {
       statusCode: 500,
@@ -390,5 +373,3 @@ const handler: Handler = async (event: HandlerEvent, context: HandlerContext) =>
     };
   }
 };
-
-export { handler };

@@ -12,7 +12,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const updateData: Record<string, unknown> = { id: uid };
+    const updateData: Record<string, unknown> = {};
     if (name) updateData.name = name;
     if (photoURL) updateData.image = photoURL;
 

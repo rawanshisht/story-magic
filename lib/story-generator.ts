@@ -5,8 +5,6 @@ import {
   generateStoryText,
   generateIllustration,
   downloadImageAsBase64,
-  saveImageForReview,
-  generateStoryFolderName,
 } from "./openai";
 
 interface GeneratedStory {
@@ -260,9 +258,6 @@ async function generateIllustrations(
   const characterReference = buildCharacterReference(child);
   const styleReference = buildStyleReference();
 
-  // Generate folder name for saving images for review
-  const reviewFolderName = generateStoryFolderName(parsedStory.title, childName);
-
   // Build all prompts upfront with character and style consistency
   const pagePrompts = parsedStory.pages.map((page) => {
     const mood = getPageMood(page.pageNumber, parsedStory.pages.length);
@@ -369,51 +364,13 @@ REMEMBER: This is part of a ${parsedStory.pages.length}-page story. The main cha
   }
 
   // Finally, update with successful downloads (URL + base64)
-  // Also save images for manual review
-  const imagesToSave: { pageNumber: number; base64: string }[] = [];
   for (const result of downloadResults) {
     if (result.status === "fulfilled") {
       const { pageNumber, url, base64 } = result.value;
       imageDataMap.set(pageNumber, { url, base64 });
-      imagesToSave.push({ pageNumber, base64 });
     } else {
       console.error("[Image Generation] Image download failed:", result.reason);
     }
-  }
-
-  // Phase 3: Save images for manual review (in parallel)
-  // Skip in serverless environments (filesystem not available)
-  const isServerless = process.env.NETLIFY === "true" || 
-                       process.env.VERCEL === "true" || 
-                       process.cwd().startsWith("/var/task");
-  
-  if (isServerless) {
-    console.log(`[Image Review] Skipping (serverless environment)`);
-  } else {
-    console.log(`[Image Review] Saving ${imagesToSave.length} images to review folder: ${reviewFolderName}`);
-    const saveStartTime = Date.now();
-
-    await processWithConcurrency(
-      imagesToSave,
-      async ({ pageNumber, base64 }) => {
-        try {
-          await saveImageForReview(
-            base64,
-            reviewFolderName,
-            pageNumber,
-            pageNumber === 1
-              ? { title: parsedStory.title, childName, moral }
-              : undefined
-          );
-        } catch (saveError) {
-          console.warn(`[Image Review] Skipping save for page ${pageNumber} (filesystem not available)`);
-        }
-      },
-      5
-    );
-
-    const saveTime = Date.now() - saveStartTime;
-    console.log(`[Image Review] All images saved in ${saveTime}ms`);
   }
 
   // Build final pages array in order

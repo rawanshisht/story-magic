@@ -3,9 +3,9 @@ export interface Child {
   name: string;
   age: number;
   gender: string;
-  skinTone: string;
-  eyeColor: string;
-  hairColor: string;
+  skinTone?: string | null;
+  eyeColor?: string | null;
+  hairColor?: string | null;
   hairStyle?: string | null;
   interests: string[];
   userId: string;

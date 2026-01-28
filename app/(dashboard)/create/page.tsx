@@ -172,7 +172,8 @@ export default function CreateStoryPage() {
         throw new Error("Please select a child and moral");
       }
 
-      const response = await fetch("/.netlify/functions/generate", {
+      // Step 1: Create the job via standard API
+      const response = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -186,10 +187,33 @@ export default function CreateStoryPage() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || "Failed to generate story");
+        throw new Error(error.error || "Failed to start story generation");
       }
 
-      return response.json();
+      const data = await response.json();
+
+      // If the API returned a storyId directly (dev mode inline processing), return it
+      if (data.storyId) {
+        return data;
+      }
+
+      // Otherwise, trigger the Netlify background function for async processing
+      const jobId = data.jobId;
+      if (!jobId) {
+        throw new Error("Failed to initialize generation job");
+      }
+
+      try {
+        fetch("/.netlify/functions/generate-background", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ jobId }),
+        });
+      } catch (e) {
+        console.error("Background function trigger error:", e);
+      }
+
+      return data;
     },
     onSuccess: (data) => {
       if (data.jobId) {
@@ -200,12 +224,12 @@ export default function CreateStoryPage() {
           title: "Story Generation Started!",
           description: "Your story is being created. This takes a few minutes.",
         });
-      } else if (data.storyId) {
+      } else if (data.storyId || data.id) {
         toast({
           title: "Story Created!",
           description: "Your personalized story has been saved!",
         });
-        router.push(`/stories/${data.storyId}`);
+        router.push(`/stories/${data.storyId || data.id}`);
       }
     },
     onError: (error) => {

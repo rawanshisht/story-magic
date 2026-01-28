@@ -45,10 +45,20 @@ export async function POST(request: Request) {
       interests,
     } = body;
 
-    if (!name || !age || !gender || !skinTone || !eyeColor || !hairColor) {
+    if (!name || !age || !gender) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
+      );
+    }
+
+    // Ensure the user exists in the database before creating the child
+    const userExists = await prisma.user.findUnique({ where: { id: userId } });
+    if (!userExists) {
+      console.error("User not found in database for userId:", userId);
+      return NextResponse.json(
+        { error: "User not found. Please sign out and sign back in." },
+        { status: 404 }
       );
     }
 
@@ -57,11 +67,13 @@ export async function POST(request: Request) {
         name,
         age: parseInt(age),
         gender,
-        skinTone,
-        eyeColor,
-        hairColor,
+        skinTone: skinTone || null,
+        eyeColor: eyeColor || null,
+        hairColor: hairColor || null,
         hairStyle: hairStyle || null,
-        interests: interests || [],
+        interests: typeof interests === 'string'
+          ? interests.split(',').map((i: string) => i.trim()).filter((i: string) => i.length > 0)
+          : Array.isArray(interests) ? interests : [],
         userId,
       },
     });

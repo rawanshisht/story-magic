@@ -1,6 +1,4 @@
-import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
-import { notFound } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import prisma from "@/lib/prisma";
 import { StoryPreview } from "@/components/story/StoryPreview";
@@ -10,21 +8,14 @@ import { StoryPage } from "@/types";
 import { DeleteStoryButton } from "./delete-button";
 import { formatDate } from "@/lib/utils";
 import { getMoralById } from "@/config/morals";
-import { getUserIdFromCookie } from "@/lib/firebase-admin";
+import { getAuthenticatedUserId } from "@/lib/auth-helper";
 
 interface StoryPageProps {
   params: Promise<{ id: string }>;
 }
 
 export default async function StoryViewPage({ params }: StoryPageProps) {
-  const cookieStore = await cookies();
-  const firebaseAuth = cookieStore.get("firebase-auth");
-  
-  if (!firebaseAuth) {
-    redirect("/login");
-  }
-
-  const userId = await getUserIdFromCookie(firebaseAuth.value);
+  const userId = await getAuthenticatedUserId();
 
   if (!userId) {
     redirect("/login");

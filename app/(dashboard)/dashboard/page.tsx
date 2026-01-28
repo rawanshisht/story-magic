@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -13,21 +12,14 @@ import {
 import { formatDate } from "@/lib/utils";
 import { Plus, BookOpen, User, Sparkles } from "lucide-react";
 import { Child, Story, StoryPage } from "@/types";
-import { getUserIdFromCookie } from "@/lib/firebase-admin";
+import { getAuthenticatedUserId } from "@/lib/auth-helper";
 import { Navbar } from "@/components/shared/Navbar";
 import { getCachedUser, getCachedChildren, getCachedRecentStories } from "@/lib/data-cache";
 
 export const revalidate = 60;
 
 export default async function DashboardPage() {
-  const cookieStore = await cookies();
-  const firebaseAuth = cookieStore.get("firebase-auth");
-  
-  if (!firebaseAuth) {
-    redirect("/login");
-  }
-
-  const userId = await getUserIdFromCookie(firebaseAuth.value);
+  const userId = await getAuthenticatedUserId();
 
   if (!userId) {
     redirect("/login");
