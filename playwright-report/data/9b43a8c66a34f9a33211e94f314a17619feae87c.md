@@ -1,0 +1,50 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e4]:
+    - link "Story Magic" [ref=e5] [cursor=pointer]:
+      - /url: /
+      - img [ref=e6]
+      - generic [ref=e8]: Story Magic
+    - main [ref=e9]:
+      - generic [ref=e11]:
+        - generic [ref=e12]:
+          - img [ref=e15]
+          - heading "Create an Account" [level=3] [ref=e17]
+          - paragraph [ref=e18]: Start creating personalized stories for your children
+        - generic [ref=e19]:
+          - button "Continue with Google" [ref=e20]:
+            - img [ref=e21]
+            - text: Continue with Google
+          - generic [ref=e29]: Or continue with
+          - generic [ref=e30]:
+            - generic [ref=e31]:
+              - text: Name
+              - textbox "Name" [ref=e32]:
+                - /placeholder: Your name
+            - generic [ref=e33]:
+              - text: Email
+              - textbox "Email" [ref=e34]:
+                - /placeholder: you@example.com
+            - generic [ref=e35]:
+              - text: Password
+              - textbox "Password" [ref=e36]:
+                - /placeholder: At least 8 characters
+            - generic [ref=e37]:
+              - text: Confirm Password
+              - textbox "Confirm Password" [ref=e38]:
+                - /placeholder: Confirm your password
+            - button "Create Account" [ref=e39]
+        - paragraph [ref=e41]:
+          - text: Already have an account?
+          - link "Sign in" [ref=e42] [cursor=pointer]:
+            - /url: /login
+  - region "Notifications (F8)":
+    - list
+  - button "Open Next.js Dev Tools" [ref=e48] [cursor=pointer]:
+    - img [ref=e49]
+  - alert [ref=e52]
+```

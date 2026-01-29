@@ -1,0 +1,221 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e4]:
+    - navigation "Main navigation" [ref=e5]:
+      - generic [ref=e6]:
+        - link "Story Magic" [ref=e7] [cursor=pointer]:
+          - /url: /
+          - img [ref=e9]
+          - generic [ref=e11]: Story Magic
+        - generic [ref=e12]:
+          - link "Sign in" [ref=e13] [cursor=pointer]:
+            - /url: /login
+            - button "Sign in" [ref=e14]
+          - link "Get Started" [ref=e15] [cursor=pointer]:
+            - /url: /register
+            - button "Get Started" [ref=e16]
+    - main [ref=e17]:
+      - generic [ref=e20]:
+        - generic [ref=e21]:
+          - img [ref=e22]
+          - generic [ref=e25]: AI-Powered Personalized Stories
+        - heading "Create Magical Stories Starring Your Child" [level=1] [ref=e26]:
+          - text: Create Magical Stories
+          - generic [ref=e27]: Starring Your Child
+        - paragraph [ref=e28]: Transform your child into the hero of their own personalized story. AI-generated tales with beautiful illustrations, tailored to their age and featuring important life lessons.
+        - generic [ref=e29]:
+          - link "Create Your First Story" [ref=e30] [cursor=pointer]:
+            - /url: /create
+            - button "Create Your First Story" [ref=e31]:
+              - img [ref=e32]
+              - text: Create Your First Story
+          - link "See How It Works" [ref=e34] [cursor=pointer]:
+            - /url: "#how-it-works"
+            - button "See How It Works" [ref=e35]
+        - generic [ref=e36]:
+          - generic [ref=e37]:
+            - img [ref=e38]
+            - generic [ref=e40]: Age-appropriate content
+          - generic [ref=e41]:
+            - img [ref=e42]
+            - generic [ref=e45]: Beautiful illustrations
+      - generic [ref=e47]:
+        - generic [ref=e48]:
+          - heading "How It Works" [level=2] [ref=e49]
+          - paragraph [ref=e50]: Create a personalized story in just a few simple steps
+        - generic [ref=e51]:
+          - generic [ref=e53]:
+            - img [ref=e55]
+            - generic [ref=e58]: "1"
+            - heading "Create an Account" [level=3] [ref=e59]
+            - paragraph [ref=e60]: Sign up in seconds with your email or Google account. Your stories are saved securely.
+          - generic [ref=e62]:
+            - img [ref=e64]
+            - generic [ref=e67]: "2"
+            - heading "Add Your Child" [level=3] [ref=e68]
+            - paragraph [ref=e69]: Enter your child's details - name, age, appearance, and interests. This personalizes every story.
+          - generic [ref=e71]:
+            - img [ref=e73]
+            - generic [ref=e76]: "3"
+            - heading "Choose a Moral" [level=3] [ref=e77]
+            - paragraph [ref=e78]: Select from meaningful life lessons like kindness, bravery, or sharing. The story teaches while entertaining.
+          - generic [ref=e80]:
+            - img [ref=e82]
+            - generic [ref=e85]: "4"
+            - heading "Get Your Story" [level=3] [ref=e86]
+            - paragraph [ref=e87]: Our AI creates a unique story with illustrations. Read online or download as a beautiful PDF.
+      - generic [ref=e89]:
+        - generic [ref=e90]:
+          - heading "Why Parents Love Us" [level=2] [ref=e91]
+          - paragraph [ref=e92]: We combine cutting-edge AI with thoughtful design to create meaningful stories for your family.
+        - generic [ref=e93]:
+          - generic [ref=e95]:
+            - img [ref=e97]
+            - heading "Beautiful Illustrations" [level=3] [ref=e103]
+            - paragraph [ref=e104]: Every story comes with AI-generated illustrations that bring your child's adventure to life.
+          - generic [ref=e106]:
+            - img [ref=e108]
+            - heading "Age-Appropriate Content" [level=3] [ref=e111]
+            - paragraph [ref=e112]: Stories automatically adjust vocabulary, length, and complexity based on your child's age.
+          - generic [ref=e114]:
+            - img [ref=e116]
+            - heading "Multiple Children" [level=3] [ref=e121]
+            - paragraph [ref=e122]: Create profiles for all your children and generate unique stories for each one.
+          - generic [ref=e124]:
+            - img [ref=e126]
+            - heading "Read Anywhere" [level=3] [ref=e128]
+            - paragraph [ref=e129]: Access your stories online from any device, or download them as beautiful PDFs.
+          - generic [ref=e131]:
+            - img [ref=e133]
+            - heading "Safe & Private" [level=3] [ref=e135]
+            - paragraph [ref=e136]: Your children's information is encrypted and never shared. We prioritize your family's privacy.
+          - generic [ref=e138]:
+            - img [ref=e140]
+            - heading "Instant Generation" [level=3] [ref=e142]
+            - paragraph [ref=e143]: Stories are created in minutes, not hours. Get a new bedtime story whenever you need one.
+      - generic [ref=e145]:
+        - generic [ref=e146]:
+          - heading "What Parents Say" [level=2] [ref=e147]
+          - paragraph [ref=e148]: Join thousands of families creating magical memories together
+        - generic [ref=e149]:
+          - generic [ref=e151]:
+            - generic [ref=e152]:
+              - img [ref=e153]
+              - img [ref=e155]
+              - img [ref=e157]
+              - img [ref=e159]
+              - img [ref=e161]
+            - paragraph [ref=e163]: “My kids absolutely love seeing themselves in the stories! The moral lessons are woven in so naturally. It's become our favorite bedtime ritual.”
+            - generic [ref=e164]:
+              - generic [ref=e166]: SM
+              - generic [ref=e167]:
+                - paragraph [ref=e168]: Sarah M.
+                - paragraph [ref=e169]: Mother of 2
+          - generic [ref=e171]:
+            - generic [ref=e172]:
+              - img [ref=e173]
+              - img [ref=e175]
+              - img [ref=e177]
+              - img [ref=e179]
+              - img [ref=e181]
+            - paragraph [ref=e183]: “The age-appropriate adjustments are fantastic. The stories for my 3-year-old are perfect - simple words and lots of repetition she loves.”
+            - generic [ref=e184]:
+              - generic [ref=e186]: MT
+              - generic [ref=e187]:
+                - paragraph [ref=e188]: Michael T.
+                - paragraph [ref=e189]: Father of 1
+          - generic [ref=e191]:
+            - generic [ref=e192]:
+              - img [ref=e193]
+              - img [ref=e195]
+              - img [ref=e197]
+              - img [ref=e199]
+              - img [ref=e201]
+            - paragraph [ref=e203]: “I've printed out several stories as PDFs and my kids treat them like real books. They're so proud to be the main character!”
+            - generic [ref=e204]:
+              - generic [ref=e206]: ER
+              - generic [ref=e207]:
+                - paragraph [ref=e208]: Emily R.
+                - paragraph [ref=e209]: Mother of 3
+      - generic [ref=e211]:
+        - generic [ref=e212]:
+          - heading "Start Creating Today" [level=2] [ref=e213]
+          - paragraph [ref=e214]: Simple, transparent pricing for magical storytelling
+        - generic [ref=e216]:
+          - generic [ref=e217]:
+            - img "Free plan icon" [ref=e218]:
+              - img [ref=e219]
+            - heading "Free to Start" [level=3] [ref=e222]
+            - generic [ref=e223]: $0/month
+          - generic [ref=e224]:
+            - list [ref=e225]:
+              - listitem [ref=e226]:
+                - img [ref=e227]
+                - generic [ref=e229]: Create unlimited child profiles
+              - listitem [ref=e230]:
+                - img [ref=e231]
+                - generic [ref=e233]: Generate personalized stories
+              - listitem [ref=e234]:
+                - img [ref=e235]
+                - generic [ref=e237]: AI-powered illustrations
+              - listitem [ref=e238]:
+                - img [ref=e239]
+                - generic [ref=e241]: 10 moral themes to choose from
+              - listitem [ref=e242]:
+                - img [ref=e243]
+                - generic [ref=e245]: Download stories as PDF
+              - listitem [ref=e246]:
+                - img [ref=e247]
+                - generic [ref=e249]: Age-appropriate content
+              - listitem [ref=e250]:
+                - img [ref=e251]
+                - generic [ref=e253]: Read stories online
+            - link "Get Started Free" [ref=e254] [cursor=pointer]:
+              - /url: /create
+              - button "Get Started Free" [ref=e255]
+            - paragraph [ref=e256]: No credit card required
+    - contentinfo [ref=e257]:
+      - generic [ref=e258]:
+        - generic [ref=e259]:
+          - generic [ref=e260]:
+            - link "Story Magic" [ref=e261] [cursor=pointer]:
+              - /url: /
+              - img [ref=e262]
+              - generic [ref=e264]: Story Magic
+            - paragraph [ref=e265]: Creating magical, personalized stories for children with AI-powered storytelling and beautiful illustrations.
+          - generic [ref=e266]:
+            - heading "Product" [level=3] [ref=e267]
+            - list [ref=e268]:
+              - listitem [ref=e269]:
+                - link "How It Works" [ref=e270] [cursor=pointer]:
+                  - /url: "#how-it-works"
+              - listitem [ref=e271]:
+                - link "Features" [ref=e272] [cursor=pointer]:
+                  - /url: "#features"
+              - listitem [ref=e273]:
+                - link "Pricing" [ref=e274] [cursor=pointer]:
+                  - /url: "#pricing"
+          - generic [ref=e275]:
+            - heading "Legal" [level=3] [ref=e276]
+            - list [ref=e277]:
+              - listitem [ref=e278]:
+                - link "Privacy Policy" [ref=e279] [cursor=pointer]:
+                  - /url: /privacy
+              - listitem [ref=e280]:
+                - link "Terms of Service" [ref=e281] [cursor=pointer]:
+                  - /url: /terms
+        - generic [ref=e282]:
+          - paragraph [ref=e283]: © 2026 Story Magic. All rights reserved. Developed By Rawan A. ElShishtawy
+          - paragraph [ref=e284]: Made with love for families everywhere
+  - region "Notifications (F8)":
+    - list
+  - button "Open Next.js Dev Tools" [ref=e290] [cursor=pointer]:
+    - img [ref=e291]
+  - alert [ref=e294]
+  - iframe [ref=e295]:
+    
+```

@@ -75,39 +75,36 @@ export async function PUT(request: Request, { params }: RouteParams) {
     // Verify story exists and belongs to user
     const story = await prisma.story.findUnique({
       where: { id, userId },
-      select: { id: true },
+      select: { id: true, content: true },
     });
 
     if (!story) {
       return NextResponse.json({ error: "Story not found" }, { status: 404 });
     }
 
-    // Use raw SQL to update only text fields without fetching/rewriting entire content
-    // This avoids transferring ~6MB of image data
-    const updateStart = Date.now();
+    // Merge new text with existing content (which includes images)
+    // The client sends "light" pages without images to save bandwidth
+    const existingPages = story.content as unknown as StoryPage[];
+    const newPages = content as StoryPage[];
 
-    // Build SQL to update each page's text using jsonb_set
-    const textUpdates = content.map((page: StoryPage, index: number) => {
-      const jsonValue = JSON.stringify(page.text);
-      const sqlSafeValue = jsonValue.replace(/'/g, "''");
-      return `jsonb_set(content, '{${index},text}', '${sqlSafeValue}'::jsonb)`;
+    const mergedContent = existingPages.map((page, index) => {
+      const update = newPages[index];
+      if (update) {
+        return {
+          ...page,
+          text: update.text
+        };
+      }
+      return page;
     });
 
-    // Chain all the jsonb_set calls
-    let updateExpression = "content";
-    for (const update of textUpdates) {
-      updateExpression = update.replace("content", updateExpression);
-    }
-
-    await prisma.$executeRawUnsafe(`
-      UPDATE "Story"
-      SET content = ${updateExpression},
-          "cachedPdf" = NULL,
-          "updatedAt" = NOW()
-      WHERE id = '${id}' AND "userId" = '${userId}'
-    `);
-
-    console.log(`[Story Update] SQL update took ${Date.now() - updateStart}ms`);
+    await prisma.story.update({
+      where: { id, userId },
+      data: {
+        content: mergedContent as any,
+        cachedPdf: null, // Invalidate cached PDF
+      },
+    });
     console.log(`[Story Update] Total: ${Date.now() - startTime}ms`);
 
     return NextResponse.json({ success: true });
