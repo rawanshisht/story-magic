@@ -75,36 +75,47 @@ export async function PUT(request: Request, { params }: RouteParams) {
     // Verify story exists and belongs to user
     const story = await prisma.story.findUnique({
       where: { id, userId },
-      select: { id: true, content: true },
+      select: { id: true },
     });
 
     if (!story) {
       return NextResponse.json({ error: "Story not found" }, { status: 404 });
     }
 
-    // Merge new text with existing content (which includes images)
-    // The client sends "light" pages without images to save bandwidth
-    const existingPages = story.content as unknown as StoryPage[];
-    const newPages = content as StoryPage[];
+    // Use raw SQL to update only text fields without fetching/rewriting entire content
+    // This avoids transferring ~6MB of image data which causes timeouts in production
+    const updateStart = Date.now();
+    const contentJson = JSON.stringify(content);
 
-    const mergedContent = existingPages.map((page, index) => {
-      const update = newPages[index];
-      if (update) {
-        return {
-          ...page,
-          text: update.text
-        };
-      }
-      return page;
-    });
+    try {
+      // We use a CTE or direct subquery to reconstruct the JSON array
+      // merging existing images with new text
+      await prisma.$executeRaw`
+        UPDATE "Story"
+        SET "content" = (
+          SELECT jsonb_agg(
+            -- Merge original element with new text
+            t.elem || jsonb_build_object('text', i.input->>'text')
+            ORDER BY t.ord
+          )
+          FROM jsonb_array_elements("content"::jsonb) WITH ORDINALITY AS t(elem, ord)
+          JOIN jsonb_array_elements(${contentJson}::jsonb) WITH ORDINALITY AS i(input, ord)
+          ON t.ord = i.ord
+        ),
+        "cachedPdf" = NULL,
+        "updatedAt" = NOW()
+        WHERE "id" = ${id} AND "userId" = ${userId}
+      `;
 
-    await prisma.story.update({
-      where: { id, userId },
-      data: {
-        content: mergedContent as any,
-        cachedPdf: null, // Invalidate cached PDF
-      },
-    });
+      console.log(`[Story Update] SQL update took ${Date.now() - updateStart}ms`);
+      return NextResponse.json({ success: true });
+    } catch (sqlError) {
+      console.error("[Story Update] SQL Error:", sqlError);
+      return NextResponse.json(
+        { error: "Database update failed" },
+        { status: 500 }
+      );
+    }
     console.log(`[Story Update] Total: ${Date.now() - startTime}ms`);
 
     return NextResponse.json({ success: true });
