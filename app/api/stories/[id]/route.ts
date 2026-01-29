@@ -72,51 +72,41 @@ export async function PUT(request: Request, { params }: RouteParams) {
 
     console.log(`[Story Update] Starting update for ${id}`);
 
-    // Verify story exists and belongs to user
-    const story = await prisma.story.findUnique({
-      where: { id, userId },
-      select: { id: true },
-    });
-
-    if (!story) {
-      return NextResponse.json({ error: "Story not found" }, { status: 404 });
-    }
-
-    // Use raw SQL to update only text fields without fetching/rewriting entire content
-    // This avoids transferring ~6MB of image data which causes timeouts in production
-    const updateStart = Date.now();
-    const contentJson = JSON.stringify(content);
-
-    try {
-      // We use a CTE or direct subquery to reconstruct the JSON array
-      // merging existing images with new text
-      await prisma.$executeRaw`
-        UPDATE "Story"
-        SET "content" = (
-          SELECT jsonb_agg(
-            -- Merge original element with new text
-            t.elem || jsonb_build_object('text', i.input->>'text')
-            ORDER BY t.ord
-          )
-          FROM jsonb_array_elements("content"::jsonb) WITH ORDINALITY AS t(elem, ord)
-          JOIN jsonb_array_elements(${contentJson}::jsonb) WITH ORDINALITY AS i(input, ord)
-          ON t.ord = i.ord
-        ),
-        "cachedPdf" = NULL,
-        "updatedAt" = NOW()
-        WHERE "id" = ${id} AND "userId" = ${userId}
-      `;
-
-      console.log(`[Story Update] SQL update took ${Date.now() - updateStart}ms`);
-      return NextResponse.json({ success: true });
-    } catch (sqlError) {
-      console.error("[Story Update] SQL Error:", sqlError);
-      return NextResponse.json(
-        { error: "Database update failed" },
-        { status: 500 }
-      );
-    }
-    console.log(`[Story Update] Total: ${Date.now() - startTime}ms`);
+        // Verify story exists and belongs to user
+        const story = await prisma.story.findUnique({
+          where: { id, userId },
+          select: { id: true, content: true },
+        });
+    
+        if (!story) {
+          return NextResponse.json({ error: "Story not found" }, { status: 404 });
+        }
+    
+        // Standard Prisma update approach: Fetch -> Merge -> Save
+        // This is more reliable than raw SQL for complex JSON operations across different DB environments
+        const existingPages = story.content as unknown as StoryPage[];
+        const newPages = content as StoryPage[];
+    
+        // Merge new text updates into existing pages (preserving images)
+        const mergedContent = existingPages.map((page, index) => {
+          const update = newPages[index];
+          if (update) {
+            return {
+              ...page,
+              text: update.text
+            };
+          }
+          return page;
+        });
+    
+        await prisma.story.update({
+          where: { id, userId },
+          data: {
+            content: mergedContent as any,
+            cachedPdf: null,
+            updatedAt: new Date(),
+          },
+        });    console.log(`[Story Update] Total: ${Date.now() - startTime}ms`);
 
     return NextResponse.json({ success: true });
   } catch (error) {

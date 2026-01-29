@@ -65,7 +65,7 @@ export function StoryPreview({ title, pages, storyId, onSave, onEmailClick }: St
       });
       setEditedPages(merged);
       setHasUnsavedChanges(true);
-      setIsEditing(true);
+      // setIsEditing(true); // Disable auto-edit for now
     } else {
       setEditedPages(pages);
     }
@@ -252,8 +252,8 @@ export function StoryPreview({ title, pages, storyId, onSave, onEmailClick }: St
           </div>
         </div>
 
-        {/* Edit Controls */}
-        {onSave && (
+        {/* Edit Controls - Hidden for now while production saving is fixed */}
+        {/* onSave && (
           <div className="flex flex-wrap justify-center gap-4">
             {isEditing ? (
               <>
@@ -294,7 +294,7 @@ export function StoryPreview({ title, pages, storyId, onSave, onEmailClick }: St
               </Button>
             )}
           </div>
-        )}
+        ) */}
 
         {/* Action Buttons */}
         <div className="flex flex-wrap justify-center gap-6">
