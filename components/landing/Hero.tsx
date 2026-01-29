@@ -17,7 +17,7 @@ export function Hero() {
 
           <h1 className="mb-8 text-5xl font-extrabold tracking-tight sm:text-6xl md:text-7xl animate-in" style={{ animationDelay: "0.1s" }}>
             Create Magical Stories{" "}
-            <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent block mt-2">
+            <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               Starring Your Child
             </span>
           </h1>
