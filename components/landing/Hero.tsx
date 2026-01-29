@@ -3,10 +3,8 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Sparkles, Heart } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
 
 export function Hero() {
-  const { user } = useAuth();
 
   return (
     <section className="relative overflow-hidden hero-gradient">
@@ -31,7 +29,7 @@ export function Hero() {
           </p>
 
           <div className="flex flex-col items-center justify-center gap-6 sm:flex-row animate-in" style={{ animationDelay: "0.3s" }}>
-            <Link href={user ? "/create" : "/register"}>
+            <Link href="/create">
               <Button size="lg" className="w-full sm:w-auto text-xl px-10 py-8">
                 <BookOpen className="mr-3 h-6 w-6" />
                 Create Your First Story

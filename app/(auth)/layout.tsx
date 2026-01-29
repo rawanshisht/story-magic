@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { BookOpen } from "lucide-react";
-import { FooterSimple } from "@/components/shared/FooterSimple";
 
 export default function AuthLayout({
   children,
@@ -17,7 +16,6 @@ export default function AuthLayout({
         <span className="text-xl font-bold">Story Magic</span>
       </Link>
       <main className="w-full max-w-md px-4">{children}</main>
-      <FooterSimple />
     </div>
   );
 }

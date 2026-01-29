@@ -4,10 +4,8 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Sparkles } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
 
 export function Pricing() {
-  const { user } = useAuth();
 
   return (
     <section className="py-20">
@@ -50,7 +48,7 @@ export function Pricing() {
                   </li>
                 ))}
               </ul>
-              <Link href={user ? "/create" : "/register"} className="mt-8 block">
+              <Link href="/create" className="mt-8 block">
                 <Button className="w-full" size="lg">
                   Get Started Free
                 </Button>
