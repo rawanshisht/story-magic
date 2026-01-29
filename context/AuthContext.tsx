@@ -4,7 +4,8 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import {
   User,
   GoogleAuthProvider,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
@@ -47,7 +48,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
+    let isMounted = true;
+
+    // Handle redirect result from Google sign-in FIRST
+    const handleRedirect = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result?.user && isMounted) {
+          // User successfully signed in via redirect
+          router.push("/dashboard");
+        }
+      } catch (error) {
+        console.error("Redirect sign-in error:", error);
+      }
+    };
+
+    handleRedirect();
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!isMounted) return;
+
       setUser(user);
 
       if (user) {
@@ -66,15 +86,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
 
-    return () => unsubscribe();
-  }, []);
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, [router]);
 
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    if (result.user) {
-      router.push("/dashboard");
-    }
+    await signInWithRedirect(auth, provider);
   };
 
   const signInWithEmail = async (email: string, password: string) => {
