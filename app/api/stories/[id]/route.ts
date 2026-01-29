@@ -88,8 +88,9 @@ export async function PUT(request: Request, { params }: RouteParams) {
 
     // Build SQL to update each page's text using jsonb_set
     const textUpdates = content.map((page: StoryPage, index: number) => {
-      const escapedText = page.text.replace(/'/g, "''").replace(/\\/g, "\\\\");
-      return `jsonb_set(content, '{${index},text}', '"${escapedText}"'::jsonb)`;
+      const jsonValue = JSON.stringify(page.text);
+      const sqlSafeValue = jsonValue.replace(/'/g, "''");
+      return `jsonb_set(content, '{${index},text}', '${sqlSafeValue}'::jsonb)`;
     });
 
     // Chain all the jsonb_set calls
