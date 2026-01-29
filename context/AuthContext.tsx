@@ -4,8 +4,8 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import {
   User,
   GoogleAuthProvider,
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
+  browserPopupRedirectResolver,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
@@ -48,26 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    let isMounted = true;
-
-    // Handle redirect result from Google sign-in FIRST
-    const handleRedirect = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result?.user && isMounted) {
-          // User successfully signed in via redirect
-          router.push("/dashboard");
-        }
-      } catch (error) {
-        console.error("Redirect sign-in error:", error);
-      }
-    };
-
-    handleRedirect();
-
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!isMounted) return;
-
       setUser(user);
 
       if (user) {
@@ -86,15 +67,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
 
-    return () => {
-      isMounted = false;
-      unsubscribe();
-    };
-  }, [router]);
+    return () => unsubscribe();
+  }, []);
 
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
-    await signInWithRedirect(auth, provider);
+    provider.setCustomParameters({
+      prompt: 'select_account'
+    });
+    const result = await signInWithPopup(auth, provider, browserPopupRedirectResolver);
+    if (result.user) {
+      router.push("/dashboard");
+    }
   };
 
   const signInWithEmail = async (email: string, password: string) => {
