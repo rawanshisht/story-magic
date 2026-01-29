@@ -4,8 +4,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import {
   User,
   GoogleAuthProvider,
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
@@ -48,17 +47,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    // Handle redirect result from Google sign-in
-    getRedirectResult(auth)
-      .then((result) => {
-        if (result?.user) {
-          router.push("/dashboard");
-        }
-      })
-      .catch((error) => {
-        console.error("Redirect sign-in error:", error);
-      });
-
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
 
@@ -79,11 +67,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => unsubscribe();
-  }, [router]);
+  }, []);
 
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
-    await signInWithRedirect(auth, provider);
+    const result = await signInWithPopup(auth, provider);
+    if (result.user) {
+      router.push("/dashboard");
+    }
   };
 
   const signInWithEmail = async (email: string, password: string) => {

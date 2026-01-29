@@ -76,7 +76,6 @@ export default function RegisterPage() {
     setIsLoading(true);
     try {
       await signInWithGoogle();
-      // Redirect happens automatically, page will navigate away
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Failed to sign in with Google";
       toast({
