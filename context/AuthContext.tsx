@@ -4,7 +4,8 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import {
   User,
   GoogleAuthProvider,
-  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
@@ -47,9 +48,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
+    // Handle redirect result from Google sign-in
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) {
+          router.push("/dashboard");
+        }
+      })
+      .catch((error) => {
+        console.error("Redirect sign-in error:", error);
+      });
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
-      
+
       if (user) {
         try {
           const idToken = await user.getIdToken(true);
@@ -62,17 +74,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         document.cookie = "firebase-auth=; path=/; max-age=0";
       }
-      
+
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [router]);
 
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
-    router.push("/dashboard");
+    await signInWithRedirect(auth, provider);
   };
 
   const signInWithEmail = async (email: string, password: string) => {
