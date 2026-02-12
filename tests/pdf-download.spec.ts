@@ -57,7 +57,7 @@ test.describe('PDF Component', () => {
     await page.goto('/');
     
     // Check for story display elements
-    await expect(page.locator('text=Stories')).toBeVisible();
+    await expect(page.locator('text=Stories').first()).toBeVisible();
   });
 
   test('should have page navigation', async ({ page }) => {

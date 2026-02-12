@@ -3,7 +3,7 @@ import { Nunito } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Toaster } from "@/components/ui/toaster";
-
+import { GoogleAnalytics } from '@next/third-parties/google'
 const nunito = Nunito({
   subsets: ["latin"],
   weight: ["400", "600", "700", "800"],
@@ -101,7 +101,7 @@ export default function RootLayout({
       name: "Story Magic",
       logo: {
         "@type": "ImageObject",
-        url: "https://storymagic.app/icon.svg",
+        url: "https://mystorymagic.uk/icon.svg",
       },
     },
   };
@@ -128,6 +128,7 @@ export default function RootLayout({
           <Toaster />
         </Providers>
       </body>
+      <GoogleAnalytics gaId="G-MWZY58521H" />
     </html>
   );
 }

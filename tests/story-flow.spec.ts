@@ -40,7 +40,7 @@ test.describe('Story Preview', () => {
     await page.goto('/');
     
     // Check for story-related elements on landing page
-    await expect(page.locator('text=Personalized Stories')).toBeVisible();
+    await expect(page.locator('text=Personalized Stories').first()).toBeVisible();
   });
 
   test('should display navigation controls in preview', async ({ page }) => {

@@ -4,13 +4,13 @@ test.describe('API Endpoints', () => {
   test('should return 401 for protected routes without auth', async ({ request }) => {
     // Test that protected routes require authentication
     const protectedRoutes = [
-      '/api/stories',
-      '/api/children',
-      '/api/generate',
+      { path: '/api/stories', method: 'get' },
+      { path: '/api/children', method: 'get' },
+      { path: '/api/generate', method: 'post' },
     ];
 
     for (const route of protectedRoutes) {
-      const response = await request.post(route);
+      const response = await (request as any)[route.method](route.path);
       expect(response.status()).toBe(401);
     }
   });
@@ -20,7 +20,7 @@ test.describe('API Endpoints', () => {
     // This is a basic test - in a real app, you might test actual API responses
     
     await page.goto('/');
-    await expect(page).toHaveTitle(/StoryBook|Story Generator/);
+    await expect(page).toHaveTitle(/Story Magic/);
   });
 });
 

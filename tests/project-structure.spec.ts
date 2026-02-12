@@ -6,7 +6,7 @@ test.describe('Project Structure', () => {
     await page.goto('/');
     
     // Check that landing page loads
-    await expect(page).toHaveTitle(/StoryBook|Story Generator/);
+    await expect(page).toHaveTitle(/Story Magic/);
   });
 
   test('should have authentication pages', async ({ page }) => {
@@ -44,7 +44,7 @@ test.describe('Authentication Flow', () => {
     
     // Check for email and password inputs
     await expect(page.locator('input[type="email"]')).toBeVisible();
-    await expect(page.locator('input[type="password"]')).toBeVisible();
+    await expect(page.locator('input[type="password"]').first()).toBeVisible();
   });
 
   test('should have register form', async ({ page }) => {
@@ -53,7 +53,7 @@ test.describe('Authentication Flow', () => {
     // Check for registration form elements
     await expect(page.locator('input[type="text"]').first()).toBeVisible();
     await expect(page.locator('input[type="email"]')).toBeVisible();
-    await expect(page.locator('input[type="password"]')).toBeVisible();
+    await expect(page.locator('input[type="password"]').first()).toBeVisible();
   });
 });
 

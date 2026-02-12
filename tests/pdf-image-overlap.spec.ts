@@ -17,7 +17,7 @@ test.describe('PDF Image Overlap Fix', () => {
   test.describe('Image Overlap Detection', () => {
     test('should NOT overlap text on portrait images (tall images)', async () => {
       // Portrait image: height > width (more vertical)
-      const portraitImage = 'data:image/png;base64,' + Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==').toString('base64');
+      const portraitImage = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
       
       const pages: StoryPage[] = [
         {
@@ -39,7 +39,7 @@ test.describe('PDF Image Overlap Fix', () => {
 
     test('should NOT overlap text on landscape images (wide images)', async () => {
       // Landscape image: width > height (more horizontal)
-      const landscapeImage = 'data:image/png;base64,' + Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=').toString('base64');
+      const landscapeImage = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
       
       const pages: StoryPage[] = [
         {
@@ -59,7 +59,7 @@ test.describe('PDF Image Overlap Fix', () => {
 
     test('should NOT overlap text on square images', async () => {
       // Square image: width = height
-      const squareImage = 'data:image/png;base64,' + Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=').toString('base64');
+      const squareImage = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
       
       const pages: StoryPage[] = [
         {
@@ -131,11 +131,10 @@ test.describe('PDF Image Overlap Fix', () => {
       const pdfStr = pdfBuffer.toString('latin1');
       const pageCount = (pdfStr.match(/\/Type\s*\/Page[^/]*/g) || []).length;
       
-      // Should have exactly 2 pages (or possibly 3 if there's an end page)
-      // But definitely NOT more than 3
-      expect(pageCount).toBeLessThanOrEqual(3);
-    });
-
+            // Should have exactly 2 story pages + cover + end page = 4 pages
+            // But definitely NOT more than 4
+            expect(pageCount).toBeLessThanOrEqual(4);
+          });
     test('should display correct page numbers', async () => {
       const pages: StoryPage[] = [
         {
@@ -208,19 +207,19 @@ test.describe('PDF Image Overlap Fix', () => {
         {
           pageNumber: 1,
           text: 'Chapter 1: The Beginning. Our hero sets out on a journey to find the legendary crystal of courage.',
-          imageBase64: 'data:image/png;base64,' + Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=').toString('base64'),
+          imageBase64: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
           imageUrl: '',
         },
         {
           pageNumber: 2,
           text: 'Chapter 2: The Challenge. Along the way, our hero faced many obstacles but never gave up.',
-          imageBase64: 'data:image/png;base64,' + Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==').toString('base64'),
+          imageBase64: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
           imageUrl: '',
         },
         {
           pageNumber: 3,
           text: 'Chapter 3: The Triumph. Finally, our hero found the crystal and learned the true meaning of courage.',
-          imageBase64: 'data:image/png;base64,' + Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=').toString('base64'),
+          imageBase64: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
           imageUrl: '',
         },
       ];

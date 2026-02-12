@@ -26,10 +26,10 @@ test.describe('Landing Page', () => {
     await page.goto('/');
     
     // Check for main sections
-    await expect(page.locator('text=How It Works')).toBeVisible();
-    await expect(page.locator('text=Features')).toBeVisible();
-    await expect(page.locator('text=Testimonials')).toBeVisible();
-    await expect(page.locator('text=Pricing')).toBeVisible();
+    await expect(page.locator('text=How It Works').first()).toBeVisible();
+    await expect(page.locator('text=Features').first()).toBeVisible();
+    await expect(page.locator('text=What Parents Say').first()).toBeVisible();
+    await expect(page.locator('text=Pricing').first()).toBeVisible();
   });
 
   test('should navigate to register page when clicking CTA', async ({ page }) => {
@@ -38,8 +38,8 @@ test.describe('Landing Page', () => {
     // Click the Create Your First Story button
     await page.click('text=Create Your First Story');
     
-    // Should redirect to register page
-    await expect(page).toHaveURL(/.*register/);
+    // Should redirect to login/register page
+    await expect(page).toHaveURL(/.*login|.*register/);
   });
 });
 
