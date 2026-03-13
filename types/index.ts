@@ -28,8 +28,23 @@ export interface Story {
   child?: Child;
   userId: string;
   pageCount: number;
+  isPublic: boolean;
+  publishedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
+}
+
+// Public story for bookstore (limited fields)
+export interface PublicStory {
+  id: string;
+  title: string;
+  moral: string;
+  content: StoryPage[];
+  pageCount: number;
+  publishedAt: Date;
+  childName: string;
+  authorName: string;
+  coverImage: string | null;
 }
 
 export interface Moral {
@@ -52,6 +67,7 @@ export interface GenerateStoryRequest {
   customSetting?: string;
   customTheme?: string;
   pageCount?: number;  // Optional, falls back to age-based default (valid range: 4-16)
+  isPublic?: boolean;  // Optional, defaults to true
 }
 
 export interface GenerateStoryResponse {

@@ -30,15 +30,15 @@ export default async function StoriesPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Your Stories</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Your Stories</h1>
           <p className="text-muted-foreground">
             All your personalized storybooks
           </p>
         </div>
-        <Link href="/create">
-          <Button>
+        <Link href="/create" className="w-full sm:w-auto">
+          <Button className="w-full sm:w-auto">
             <Sparkles className="mr-2 h-4 w-4" />
             Create New Story
           </Button>
@@ -62,7 +62,7 @@ export default async function StoriesPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {stories.map((story) => {
             const content = story.content as unknown as StoryPage[];
             const firstPage = content[0];

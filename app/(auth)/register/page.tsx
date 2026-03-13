@@ -54,12 +54,12 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      await signUpWithEmail(email, password);
+      await signUpWithEmail(email, password, name);
       toast({
         title: "Success",
         description: "Account created successfully!",
       });
-      router.push("/dashboard");
+      // No need to redirect here - signUpWithEmail already handles it
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : "Failed to create account";
       toast({

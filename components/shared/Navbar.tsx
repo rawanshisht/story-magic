@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { BookOpen, User, LogOut, LayoutDashboard, Sparkles } from "lucide-react";
+import { BookOpen, User, LogOut, LayoutDashboard, Sparkles, Store } from "lucide-react";
 import { getInitials } from "@/lib/utils";
 
 export function Navbar() {
@@ -45,15 +45,21 @@ export function Navbar() {
 
   return (
     <nav role="navigation" aria-label="Main navigation" className="sticky top-0 z-50 w-full border-b-2 border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-20 items-center justify-between">
-        <Link href="/" className="flex items-center space-x-3 transition-transform hover:scale-105">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            <BookOpen className="h-6 w-6" />
+      <div className="container flex h-16 md:h-20 items-center justify-between px-4">
+        <Link href="/" className="flex items-center space-x-2 md:space-x-3 transition-transform hover:scale-105 min-w-0">
+          <div className="flex h-9 w-9 md:h-10 md:w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shrink-0">
+            <BookOpen className="h-5 w-5 md:h-6 md:w-6" />
           </div>
-          <span className="text-2xl font-extrabold text-primary tracking-tight">Story Magic</span>
+          <span className="text-xl md:text-2xl font-extrabold text-primary tracking-tight truncate">Story Magic</span>
         </Link>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 md:space-x-4">
+          <Link href="/bookstore" className="hidden md:block">
+            <Button variant="ghost" size="lg" className="text-lg font-bold text-foreground">
+              <Store className="mr-2 h-6 w-6 text-accent" />
+              Bookstore
+            </Button>
+          </Link>
           {user ? (
             <>
               <Link href="/dashboard" className="hidden md:block">
@@ -65,22 +71,23 @@ export function Navbar() {
               <Link href="/stories" className="hidden md:block">
                 <Button variant="ghost" size="lg" className="text-lg font-bold text-foreground">
                   <BookOpen className="mr-2 h-6 w-6 text-primary" />
-                  Stories
+                  My Stories
                 </Button>
               </Link>
               <Link href="/create">
-                <Button variant="accent" size="lg" className="font-bold">
-                  <Sparkles className="mr-2 h-5 w-5" />
-                  Create!
+                <Button variant="accent" size="sm" className="font-bold md:size-lg">
+                  <Sparkles className="mr-1 md:mr-2 h-4 w-4 md:h-5 md:w-5" />
+                  <span className="hidden sm:inline">Create!</span>
+                  <span className="sm:hidden">Create</span>
                 </Button>
               </Link>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="relative h-12 w-12 rounded-full ring-2 ring-primary/20 hover:ring-primary"
+                    className="relative h-10 w-10 md:h-12 md:w-12 rounded-full ring-2 ring-primary/20 hover:ring-primary p-0"
                   >
-                    <Avatar className="h-10 w-10">
+                    <Avatar className="h-8 w-8 md:h-10 md:w-10">
                       <AvatarImage
                         src={user.photoURL || ""}
                         alt={user.displayName || ""}
@@ -111,13 +118,19 @@ export function Navbar() {
                       Dashboard
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild className="rounded-xl cursor-pointer">
-                    <Link href="/stories" className="w-full font-bold">
-                      <BookOpen className="mr-2 h-5 w-5 text-primary" />
-                      My Stories
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-border" />
+              <DropdownMenuItem asChild className="rounded-xl cursor-pointer">
+                <Link href="/stories" className="w-full font-bold">
+                  <BookOpen className="mr-2 h-5 w-5 text-primary" />
+                  My Stories
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="rounded-xl cursor-pointer">
+                <Link href="/bookstore" className="w-full font-bold">
+                  <Store className="mr-2 h-5 w-5 text-accent" />
+                  Bookstore
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-border" />
                   <DropdownMenuItem
                     className="cursor-pointer text-destructive rounded-xl font-bold focus:text-destructive"
                     onClick={handleLogout}
@@ -130,6 +143,12 @@ export function Navbar() {
             </>
           ) : (
             <>
+              <Link href="/bookstore">
+                <Button variant="ghost" size="lg" className="text-lg font-bold">
+                  <Store className="mr-2 h-6 w-6 text-accent" />
+                  Bookstore
+                </Button>
+              </Link>
               <Link href="/login">
                 <Button variant="ghost" size="lg" className="text-lg font-bold">
                   Sign in

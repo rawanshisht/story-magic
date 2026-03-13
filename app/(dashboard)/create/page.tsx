@@ -25,7 +25,8 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, ArrowRight, Sparkles, Check, Plus } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { ArrowLeft, ArrowRight, Sparkles, Check, Plus, Globe } from "lucide-react";
 import { Child } from "@/types";
 import { cn } from "@/lib/utils";
 
@@ -68,6 +69,7 @@ export default function CreateStoryPage() {
   const [customTheme, setCustomTheme] = useState<string>("");
   const [pageCount, setPageCount] = useState<number | undefined>(undefined);
   const [showNewChildForm, setShowNewChildForm] = useState(false);
+  const [isPublic, setIsPublic] = useState<boolean>(true);
   const [jobId, setJobId] = useState<string | null>(null);
   const [generationProgress, setGenerationProgress] = useState(0);
   const [isPolling, setIsPolling] = useState(false);
@@ -198,6 +200,7 @@ export default function CreateStoryPage() {
           customSetting: customSetting || undefined,
           customTheme: customTheme || undefined,
           pageCount: pageCount || undefined,
+          isPublic,
         }),
       });
 
@@ -290,9 +293,9 @@ export default function CreateStoryPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-10 py-6">
       {/* Progress Header */}
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl font-black text-primary tracking-tight">Create Magic!</h1>
-        <p className="text-xl text-muted-foreground font-medium">
+      <div className="text-center space-y-4 px-4">
+        <h1 className="text-3xl sm:text-4xl font-black text-primary tracking-tight">Create Magic!</h1>
+        <p className="text-lg sm:text-xl text-muted-foreground font-medium">
           Follow the path to build your very own story
         </p>
       </div>
@@ -309,7 +312,7 @@ export default function CreateStoryPage() {
             <div key={step.id} className="flex flex-col items-center gap-2">
               <div
                 className={cn(
-                  "flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold transition-all border-4",
+                  "flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full text-base sm:text-lg font-bold transition-all border-2 sm:border-4",
                   index < currentStep
                     ? "bg-primary border-primary text-primary-foreground scale-110"
                     : index === currentStep
@@ -336,11 +339,11 @@ export default function CreateStoryPage() {
 
       {/* Step Content */}
       <Card className="border-4 border-primary/10 shadow-xl rounded-3xl overflow-hidden">
-        <CardHeader className="bg-primary/5 border-b-2 border-primary/10 py-8">
-          <CardTitle className="text-3xl font-bold text-center">{STEPS[currentStep].title}</CardTitle>
-          <CardDescription className="text-center text-lg">{STEPS[currentStep].description}</CardDescription>
+        <CardHeader className="bg-primary/5 border-b-2 border-primary/10 py-6 sm:py-8">
+          <CardTitle className="text-2xl sm:text-3xl font-bold text-center">{STEPS[currentStep].title}</CardTitle>
+          <CardDescription className="text-center text-base sm:text-lg">{STEPS[currentStep].description}</CardDescription>
         </CardHeader>
-        <CardContent className="p-8">
+        <CardContent className="p-4 sm:p-8">
           {/* Step 1: Select Child */}
           {currentStep === 0 && (
             <div className="space-y-8">
@@ -533,6 +536,27 @@ export default function CreateStoryPage() {
                     </div>
                   </div>
 
+                  {/* Visibility Toggle */}
+                  <div className="rounded-2xl border-2 border-muted bg-muted/30 p-6">
+                    <div className="flex items-center justify-center gap-3 mb-4">
+                      <Globe className="h-6 w-6 text-primary" />
+                      <h3 className="text-xl font-bold">Share Your Story</h3>
+                    </div>
+                    <p className="text-muted-foreground mb-4">
+                      Make your story public in the Bookstore for others to enjoy!
+                    </p>
+                    <div className="flex items-center justify-center gap-3">
+                      <Switch
+                        id="isPublic"
+                        checked={isPublic}
+                        onCheckedChange={setIsPublic}
+                      />
+                      <Label htmlFor="isPublic" className="text-lg font-bold cursor-pointer">
+                        {isPublic ? "Yes, make it public!" : "Keep it private"}
+                      </Label>
+                    </div>
+                  </div>
+
                   <Button
                     size="lg"
                     onClick={() => generateStoryMutation.mutate()}
@@ -550,27 +574,29 @@ export default function CreateStoryPage() {
 
       {/* Navigation Buttons */}
       {!generateStoryMutation.isPending && !isPolling && (
-        <div className="flex justify-between items-center px-4">
+        <div className="flex justify-between items-center px-4 gap-2 sm:gap-4">
           <Button
             variant="ghost"
-            size="lg"
-            className="font-bold text-lg hover:bg-muted rounded-full"
+            size="sm"
+            className="font-bold text-base sm:text-lg hover:bg-muted rounded-full h-10 sm:h-14"
             onClick={() => setCurrentStep((prev) => prev - 1)}
             disabled={currentStep === 0}
           >
-            <ArrowLeft className="mr-2 h-6 w-6" />
-            Go Back
+            <ArrowLeft className="mr-1 sm:mr-2 h-4 w-4 sm:h-6 sm:w-6" />
+            <span className="hidden sm:inline">Go Back</span>
+            <span className="sm:hidden">Back</span>
           </Button>
 
           {currentStep < STEPS.length - 1 && (
             <Button
-              size="lg"
-              className="font-bold text-lg rounded-full px-10 h-14 shadow-md"
+              size="sm"
+              className="font-bold text-base sm:text-lg rounded-full px-4 sm:px-10 h-10 sm:h-14 shadow-md"
               onClick={() => setCurrentStep((prev) => prev + 1)}
               disabled={!canProceed()}
             >
-              Keep Going!
-              <ArrowRight className="ml-2 h-6 w-6" />
+              <span className="hidden sm:inline">Keep Going!</span>
+              <span className="sm:hidden">Next</span>
+              <ArrowRight className="ml-1 sm:ml-2 h-4 w-4 sm:h-6 sm:w-6" />
             </Button>
           )}
         </div>

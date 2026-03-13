@@ -15,34 +15,34 @@ export function Hero() {
             <span className="text-primary">AI-Powered Personalized Stories</span>
           </div>
 
-          <h1 className="mb-8 text-5xl font-extrabold tracking-tight sm:text-6xl md:text-7xl animate-in" style={{ animationDelay: "0.1s" }}>
+          <h1 className="mb-6 md:mb-8 text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight animate-in" style={{ animationDelay: "0.1s" }}>
             Create Magical Stories{" "}
             <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               Starring Your Child
             </span>
           </h1>
 
-          <p className="mb-10 mx-auto max-w-2xl text-xl md:text-2xl text-muted-foreground animate-in" style={{ animationDelay: "0.2s" }}>
+          <p className="mb-8 md:mb-10 mx-auto max-w-2xl text-lg sm:text-xl md:text-2xl text-muted-foreground animate-in px-4" style={{ animationDelay: "0.2s" }}>
             Transform your child into the hero of their own personalized
             story. AI-generated tales with beautiful illustrations, tailored
             to their age and featuring important life lessons.
           </p>
 
-          <div className="flex flex-col items-center justify-center gap-6 sm:flex-row animate-in" style={{ animationDelay: "0.3s" }}>
-            <Link href="/create">
-              <Button size="lg" className="w-full sm:w-auto text-xl px-10 py-8">
-                <BookOpen className="mr-3 h-6 w-6" />
+          <div className="flex flex-col items-center justify-center gap-4 sm:gap-6 sm:flex-row px-4 animate-in" style={{ animationDelay: "0.3s" }}>
+            <Link href="/create" className="w-full sm:w-auto">
+              <Button size="lg" className="w-full text-lg sm:text-xl px-6 sm:px-10 py-6 sm:py-8">
+                <BookOpen className="mr-2 sm:mr-3 h-5 sm:h-6 w-5 sm:w-6" />
                 Create Your First Story
               </Button>
             </Link>
-            <Link href="#how-it-works">
-              <Button variant="secondary" size="lg" className="w-full sm:w-auto text-xl px-10 py-8">
+            <Link href="#how-it-works" className="w-full sm:w-auto">
+              <Button variant="secondary" size="lg" className="w-full text-lg sm:text-xl px-6 sm:px-10 py-6 sm:py-8">
                 See How It Works
               </Button>
             </Link>
           </div>
 
-          <div className="mt-16 flex flex-wrap items-center justify-center gap-8 text-base font-bold text-muted-foreground animate-in" style={{ animationDelay: "0.4s" }}>
+          <div className="mt-12 md:mt-16 flex flex-wrap items-center justify-center gap-4 md:gap-8 text-sm md:text-base font-bold text-muted-foreground animate-in px-4" style={{ animationDelay: "0.4s" }}>
             <div className="flex items-center gap-2 bg-white/50 px-4 py-2 rounded-full border border-border">
               <Heart className="h-5 w-5 text-destructive fill-current" />
               <span>Age-appropriate content</span>

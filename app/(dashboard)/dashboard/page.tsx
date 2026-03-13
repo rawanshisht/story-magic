@@ -36,24 +36,24 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">
+          <h1 className="text-2xl sm:text-3xl font-bold">
             Welcome back, {userName}!
           </h1>
           <p className="text-muted-foreground">
             Create magical stories for your children
           </p>
         </div>
-        <Link href="/create">
-          <Button>
+        <Link href="/create" className="w-full sm:w-auto">
+          <Button className="w-full sm:w-auto">
             <Sparkles className="mr-2 h-4 w-4" />
             Create New Story
           </Button>
         </Link>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">
@@ -134,7 +134,7 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {children.map((child) => (
               <Card key={child.id}>
                 <CardHeader>
@@ -201,7 +201,7 @@ export default async function DashboardPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {stories.map((story) => {
               const content = story.content as unknown as StoryPage[];
               const firstPage = content[0];

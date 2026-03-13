@@ -77,12 +77,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     const result = await signInWithPopup(auth, provider, browserPopupRedirectResolver);
     if (result.user) {
+      // Set cookie immediately before redirect to avoid race condition
+      const idToken = await result.user.getIdToken();
+      document.cookie = `firebase-auth=${idToken}; path=/; max-age=3600; SameSite=Lax`;
+      await syncUserToDatabase(result.user);
       router.push("/dashboard");
     }
   };
 
   const signInWithEmail = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password);
+    const result = await signInWithEmailAndPassword(auth, email, password);
+    // Set cookie immediately before redirect to avoid race condition
+    const idToken = await result.user.getIdToken();
+    document.cookie = `firebase-auth=${idToken}; path=/; max-age=3600; SameSite=Lax`;
+    await syncUserToDatabase(result.user);
     router.push("/dashboard");
   };
 
@@ -95,6 +103,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       );
     }
     
+    // Set cookie immediately before redirect to avoid race condition
+    const idToken = await user.getIdToken();
+    document.cookie = `firebase-auth=${idToken}; path=/; max-age=3600; SameSite=Lax`;
+    await syncUserToDatabase(user);
     router.push("/dashboard");
   };
 
