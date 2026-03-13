@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, CheckCircle } from "lucide-react";
 import { StoryPage } from "@/types";
 import { DeleteStoryButton } from "./delete-button";
+import { VisibilityToggle } from "@/components/story/VisibilityToggle";
 import { formatDate } from "@/lib/utils";
 import { getMoralById } from "@/config/morals";
 import { getAuthenticatedUserId } from "@/lib/auth-helper";
@@ -66,6 +67,8 @@ export default async function StoryViewPage({ params }: StoryPageProps) {
           <DeleteStoryButton storyId={story.id} storyTitle={story.title} />
         </div>
       </div>
+
+      <VisibilityToggle storyId={story.id} initialIsPublic={story.isPublic} />
 
       <StoryViewClient title={story.title} pages={content} storyId={story.id} />
     </div>

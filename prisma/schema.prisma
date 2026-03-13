@@ -39,18 +39,20 @@ model Child {
 }
 
 model Story {
-  id        String   @id @default(cuid())
-  title     String
-  moral     String
-  content   Json
-  childId   String
-  child     Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  pageCount Int
-  cachedPdf Bytes?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String    @id @default(cuid())
+  title       String
+  moral       String
+  content     Json
+  childId     String
+  child       Child     @relation(fields: [childId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pageCount   Int
+  cachedPdf   Bytes?
+  isPublic    Boolean   @default(true)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model Account {
@@ -88,17 +90,18 @@ model VerificationToken {
 }
 
 model StoryJob {
-  id        String   @id @default(uuid())
-  userId    String
-  childId   String
-  moral     String
+  id            String   @id @default(uuid())
+  userId        String
+  childId       String
+  moral         String
   customSetting String?
-  customTheme  String?
-  pageCount Int
-  status    String   @default("processing") // "processing", "complete", "failed"
-  progress  Int      @default(0)
-  storyId   String?
-  error     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  customTheme   String?
+  pageCount     Int
+  status        String   @default("processing") // "processing", "complete", "failed"
+  progress      Int      @default(0)
+  storyId       String?
+  error         String?
+  isPublic      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }

@@ -215,3 +215,425 @@
 .card-kids {
   @apply rounded-3xl border-2 border-border bg-card text-card-foreground shadow-sm;
 }
+
+/* Book Flipping & Paper Texture */
+.paper-page {
+  background-color: #fffdfa;
+  background-image: 
+    linear-gradient(90deg, rgba(0,0,0,0.03) 0%, rgba(255,255,255,0) 5%, rgba(255,255,255,0) 95%, rgba(0,0,0,0.03) 100%),
+    url("https://www.transparenttextures.com/patterns/natural-paper.png");
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.01);
+  position: relative;
+  overflow: hidden;
+}
+
+.paper-page-left {
+  border-radius: 20px 0 0 20px;
+}
+
+.paper-page-right {
+  border-radius: 0 20px 20px 0;
+}
+
+.paper-page-cover-right {
+  border-radius: 5px 20px 20px 5px !important;
+}
+
+.paper-page-cover-left {
+  border-radius: 20px 5px 5px 20px !important;
+}
+
+.book-spine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 60px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.book-spine-left {
+  right: 0;
+  background: linear-gradient(to right, 
+    transparent 0%, 
+    rgba(0,0,0,0.02) 40%, 
+    rgba(0,0,0,0.1) 85%, 
+    rgba(0,0,0,0.2) 100%
+  );
+}
+
+.book-spine-right {
+  left: 0;
+  background: linear-gradient(to left, 
+    transparent 0%, 
+    rgba(0,0,0,0.02) 40%, 
+    rgba(0,0,0,0.1) 85%, 
+    rgba(0,0,0,0.2) 100%
+  );
+}
+
+.page-corner {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.05) 50%);
+  z-index: 5;
+  transition: all 0.3s ease;
+  clip-path: polygon(100% 0, 0 100%, 100% 100%);
+}
+
+.paper-page:hover .page-corner {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.08) 50%);
+}
+
+.book-container {
+  perspective: 2500px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 0;
+}
+
+.stf__parent {
+  background-color: transparent !important;
+}
+
+.stf__wrapper {
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.3), 0 18px 36px -18px rgba(0, 0, 0, 0.35) !important;
+  border-radius: 20px !important;
+}
+
+/* ============================================
+   VINTAGE LETTERPRESS STORYBOOK STYLES
+   ============================================ */
+
+/* Vintage Paper Colors */
+:root {
+  --paper-cream: #F5F1E6;
+  --paper-sepia: #EDE6D6;
+  --paper-aged: #E8DCC4;
+  --ink-brown: #3D2914;
+  --ink-faded: #6B4423;
+  --gold-accent: #B8860B;
+  --red-deco: #8B4513;
+}
+
+/* Vintage Paper Texture */
+.paper-vintage {
+  background-color: var(--paper-cream);
+  background-image: 
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse at 30% 20%, rgba(139, 69, 19, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(139, 69, 19, 0.02) 0%, transparent 50%);
+  box-shadow: 
+    inset 0 0 120px rgba(139, 69, 19, 0.06),
+    0 20px 60px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+/* Aged paper edges vignette */
+.paper-vintage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(139, 69, 19, 0.08) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Letterpress Text Effect */
+.text-letterpress {
+  color: var(--ink-brown);
+  text-shadow: 
+    0 1px 1px rgba(255, 255, 255, 0.4),
+    0 -1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.text-letterpress-light {
+  color: var(--ink-faded);
+  text-shadow: 
+    0 1px 1px rgba(255, 255, 255, 0.3),
+    0 -1px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Ornate Decorative Border */
+.border-ornate {
+  border: 3px double var(--gold-accent);
+  border-radius: 2px;
+  position: relative;
+}
+
+.border-ornate::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border: 1px solid var(--gold-accent);
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Corner Flourishes */
+.corner-flourish {
+  position: relative;
+}
+
+.corner-flourish::before,
+.corner-flourish::after {
+  content: '❦';
+  position: absolute;
+  font-size: 28px;
+  color: var(--gold-accent);
+  opacity: 0.5;
+  font-family: serif;
+  line-height: 1;
+}
+
+.corner-flourish::before {
+  top: 12px;
+  left: 12px;
+}
+
+.corner-flourish::after {
+  bottom: 12px;
+  right: 12px;
+  transform: rotate(180deg);
+}
+
+/* Book Cover Open Animation */
+@keyframes openBookCover {
+  0% { 
+    transform: perspective(2000px) rotateY(0deg) scale(1); 
+    opacity: 1;
+  }
+  50% { 
+    transform: perspective(2000px) rotateY(-25deg) scale(0.98); 
+  }
+  100% { 
+    transform: perspective(2000px) rotateY(-95deg) scale(0.92); 
+    opacity: 0;
+  }
+}
+
+.animate-open-book {
+  animation: openBookCover 900ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transform-origin: left center;
+}
+
+/* Book View Entrance */
+@keyframes bookViewEnter {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-book-enter {
+  animation: bookViewEnter 600ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Ink Reveal Animation for Text */
+@keyframes inkReveal {
+  0% { 
+    opacity: 0; 
+    filter: blur(2px); 
+    transform: translateY(8px);
+  }
+  100% { 
+    opacity: 1; 
+    filter: blur(0); 
+    transform: translateY(0);
+  }
+}
+
+.animate-ink-reveal {
+  animation: inkReveal 700ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Staggered ink reveal for multiple elements */
+.ink-reveal-1 { animation-delay: 0ms; }
+.ink-reveal-2 { animation-delay: 150ms; }
+.ink-reveal-3 { animation-delay: 300ms; }
+.ink-reveal-4 { animation-delay: 450ms; }
+
+/* Hand pointer animation for "Click to Open" */
+@keyframes handPoint {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(8px); }
+}
+
+.animate-hand-point {
+  animation: handPoint 1.5s ease-in-out infinite;
+}
+
+/* Decorative Divider */
+.decorative-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--gold-accent);
+  opacity: 0.6;
+}
+
+.decorative-divider::before,
+.decorative-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-accent), transparent);
+}
+
+.decorative-divider span {
+  font-size: 20px;
+}
+
+/* Vintage Page Styling */
+.vintage-page {
+  background-color: var(--paper-cream);
+  background-image: 
+    linear-gradient(90deg, rgba(0,0,0,0.02) 0%, transparent 4%, transparent 96%, rgba(0,0,0,0.02) 100%);
+  position: relative;
+}
+
+.vintage-page-left {
+  border-radius: 3px 0 0 3px;
+}
+
+.vintage-page-right {
+  border-radius: 0 3px 3px 0;
+}
+
+/* Spine shadow for book pages */
+.page-spine-left {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 40px;
+  background: linear-gradient(to left, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.02) 50%, transparent 100%);
+  pointer-events: none;
+}
+
+.page-spine-right {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 40px;
+  background: linear-gradient(to right, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.02) 50%, transparent 100%);
+  pointer-events: none;
+}
+
+/* Drop Cap for text pages */
+.drop-cap::first-letter {
+  float: left;
+  font-family: var(--font-playfair);
+  font-size: 4rem;
+  line-height: 0.8;
+  padding-right: 12px;
+  padding-top: 4px;
+  color: var(--gold-accent);
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
+}
+
+/* Back cover fade in */
+@keyframes backCoverFadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-back-cover-enter {
+  animation: backCoverFadeIn 500ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Page number styling */
+.page-number {
+  font-family: var(--font-special);
+  font-size: 14px;
+  color: var(--ink-faded);
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+}
+
+/* Vintage Button Styling (for actions) */
+.btn-vintage {
+  background: var(--paper-cream);
+  border: 2px solid var(--gold-accent);
+  color: var(--ink-brown);
+  font-family: var(--font-special);
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  padding: 12px 24px;
+  border-radius: 2px;
+  transition: all 200ms ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-vintage:hover {
+  background: var(--paper-sepia);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.btn-vintage:active {
+  transform: translateY(0);
+}
+
+/* Cover image frame */
+.cover-image-frame {
+  position: relative;
+  padding: 8px;
+  background: var(--paper-sepia);
+  border: 2px solid var(--gold-accent);
+  border-radius: 50%;
+  box-shadow: 
+    inset 0 2px 8px rgba(0,0,0,0.1),
+    0 4px 12px rgba(0,0,0,0.15);
+}
+
+.cover-image-frame::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px solid var(--gold-accent);
+  border-radius: 50%;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Circular image container */
+.cover-image-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--paper-aged);
+}
+
+/* Typography Utilities */
+.font-playfair {
+  font-family: var(--font-playfair);
+}
+
+.font-crimson {
+  font-family: var(--font-crimson);
+}
+
+.font-special {
+  font-family: var(--font-special);
+}

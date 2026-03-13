@@ -99,8 +99,81 @@ export const getCachedRecentStories = cache(async (userId: string) => {
   return result;
 });
 
+const publicStoriesCache = new LRUCache(10, 60000);
+
+export interface PublicStory {
+  id: string;
+  title: string;
+  moral: string;
+  pageCount: number;
+  publishedAt: Date | null;
+  childName: string;
+  authorName: string;
+  coverImage: string | null;
+}
+
+export interface PublicStoriesPagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface PublicStoriesResult {
+  stories: PublicStory[];
+  pagination: PublicStoriesPagination;
+}
+
+export const getCachedPublicStories = cache(async (page: number = 1, limit: number = 12): Promise<PublicStoriesResult> => {
+  const key = `public:${page}:${limit}`;
+  const cached = publicStoriesCache.get(key);
+  if (cached) return cached as PublicStoriesResult;
+
+  const skip = (page - 1) * limit;
+
+  const [stories, total] = await Promise.all([
+    prisma.story.findMany({
+      where: { isPublic: true },
+      include: {
+        child: { select: { name: true } },
+        user: { select: { name: true } },
+      },
+      orderBy: { publishedAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    prisma.story.count({ where: { isPublic: true } }),
+  ]);
+
+  // Transform to public format (remove sensitive data)
+  const publicStories = stories.map((story) => ({
+    id: story.id,
+    title: story.title,
+    moral: story.moral,
+    pageCount: story.pageCount,
+    publishedAt: story.publishedAt,
+    childName: story.child.name,
+    authorName: story.user.name || "Anonymous",
+    coverImage: (story.content as any)[0]?.imageUrl || null,
+  }));
+
+  const result = {
+    stories: publicStories,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+
+  publicStoriesCache.set(key, result);
+  return result;
+});
+
 export function clearDataCache() {
   userCache.clear();
   childrenCache.clear();
   storiesCache.clear();
+  publicStoriesCache.clear();
 }

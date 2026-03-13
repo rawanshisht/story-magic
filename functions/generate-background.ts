@@ -341,6 +341,8 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
         childId: job.childId,
         userId: job.userId,
         pageCount: generatedStory.pages.length,
+        isPublic: job.isPublic !== false,
+        publishedAt: job.isPublic !== false ? new Date() : null,
       },
       include: { child: true },
     });

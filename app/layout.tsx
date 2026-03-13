@@ -1,13 +1,32 @@
 import type { Metadata } from "next";
-import { Nunito } from "next/font/google";
+import { Nunito, Playfair_Display, Crimson_Text, Special_Elite } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Toaster } from "@/components/ui/toaster";
 import { GoogleAnalytics } from '@next/third-parties/google'
+
 const nunito = Nunito({
   subsets: ["latin"],
   weight: ["400", "600", "700", "800"],
   variable: "--font-nunito",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "600", "700", "900"],
+  variable: "--font-playfair",
+});
+
+const crimson = Crimson_Text({
+  subsets: ["latin"],
+  weight: ["400", "600"],
+  variable: "--font-crimson",
+});
+
+const specialElite = Special_Elite({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-special",
 });
 
 export const metadata: Metadata = {
@@ -114,7 +133,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={`${nunito.className} font-sans antialiased`}>
+      <body className={`${nunito.className} ${playfair.variable} ${crimson.variable} ${specialElite.variable} font-sans antialiased`}>
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:font-bold focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"

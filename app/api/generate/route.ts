@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { childId, moral, customSetting, customTheme, pageCount } = body;
+    const { childId, moral, customSetting, customTheme, pageCount, isPublic } = body;
 
     if (!childId || !moral) {
       return NextResponse.json(
@@ -78,6 +78,8 @@ export async function POST(request: Request) {
           childId,
           userId,
           pageCount: generatedStory.pages.length,
+          isPublic: isPublic !== false,
+          publishedAt: isPublic !== false ? new Date() : null,
         },
         include: { child: true },
       });
@@ -101,6 +103,7 @@ export async function POST(request: Request) {
         pageCount: effectivePageCount,
         status: "processing",
         progress: 0,
+        isPublic: isPublic !== false,
       },
     });
 
