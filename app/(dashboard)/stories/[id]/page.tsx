@@ -43,15 +43,15 @@ export default async function StoryViewPage({ params }: StoryPageProps) {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-4 min-w-0">
           <Link href="/stories">
             <Button variant="ghost" size="icon">
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
-          <div>
-            <h1 className="text-3xl font-bold">{story.title}</h1>
+          <div className="min-w-0">
+            <h1 className="text-3xl font-bold break-words">{story.title}</h1>
             <p className="text-muted-foreground">
               For {story.child.name} &bull; Created {formatDate(story.createdAt)}
             </p>

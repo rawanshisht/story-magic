@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAuthenticatedUserId } from "@/lib/auth-helper";
 import prisma from "@/lib/prisma";
+import { clearDataCache } from "@/lib/data-cache";
 
 export async function PATCH(
   request: Request,
@@ -13,11 +14,16 @@ export async function PATCH(
     }
 
     const { id } = await params;
-    const { isPublic } = await request.json();
+    const { isPublic } = await request.json().catch(() => ({}));
+
+    if (typeof isPublic !== "boolean") {
+      return NextResponse.json({ error: "isPublic must be a boolean" }, { status: 400 });
+    }
 
     // Verify story ownership
     const story = await prisma.story.findFirst({
       where: { id, userId },
+      select: { id: true },
     });
 
     if (!story) {
@@ -32,6 +38,9 @@ export async function PATCH(
         publishedAt: isPublic ? new Date() : null,
       },
     });
+
+    // So the bookstore listing reflects the change straight away.
+    clearDataCache();
 
     return NextResponse.json({
       success: true,

@@ -10,7 +10,9 @@ test.describe('API Endpoints', () => {
     ];
 
     for (const route of protectedRoutes) {
-      const response = await (request as any)[route.method](route.path);
+      const response = route.method === 'post'
+        ? await request.post(route.path)
+        : await request.get(route.path);
       expect(response.status()).toBe(401);
     }
   });
@@ -25,12 +27,9 @@ test.describe('API Endpoints', () => {
 });
 
 test.describe('PDF Generation', () => {
-  test('should have PDF generation endpoint structure', async ({ page }) => {
-    // Check that the PDF generation route exists
-    await page.goto('/');
-    
-    // The route structure should be /api/stories/[id]/pdf
-    // This test verifies the route exists by checking navigation
-    await expect(page.locator('text=Download as PDF')).toBeVisible();
+  test('should have PDF generation endpoint structure', async ({ request }) => {
+    // The route /api/stories/[id]/pdf exists and requires auth for non-public stories
+    const response = await request.get('/api/stories/does-not-exist/pdf');
+    expect(response.status()).toBe(401);
   });
 });

@@ -1,6 +1,16 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { getAuthenticatedUserId } from "@/lib/auth-helper";
+import { checkRateLimit } from "@/lib/rate-limit";
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 import prisma from "@/lib/prisma";
 import { generatePDFForEmail } from "@/lib/pdf-generator-email";
 import { getMoralById } from "@/config/morals";
@@ -34,11 +44,19 @@ export async function POST(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json();
+    const body = await request.json().catch(() => ({}));
     const { email } = body;
 
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (typeof email !== "string" || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json({ error: "Valid email is required" }, { status: 400 });
+    }
+
+    // Emails go to arbitrary addresses, so cap them to prevent abuse.
+    if (!checkRateLimit(`story-email:${userId}`, 10, 60 * 60 * 1000)) {
+      return NextResponse.json(
+        { error: "Too many emails sent. Please try again later." },
+        { status: 429 }
+      );
     }
 
     const startTime = Date.now();
@@ -97,7 +115,6 @@ export async function POST(request: Request, { params }: RouteParams) {
     }
 
     // Send email with PDF attachment
-    console.log("[Email] Sending email to:", email);
     const emailStart = Date.now();
     const { data, error } = await getResendClient().emails.send({
       from: process.env.RESEND_FROM_EMAIL || "Story Magic <onboarding@resend.dev>",
@@ -108,7 +125,7 @@ export async function POST(request: Request, { params }: RouteParams) {
           <h1 style="color: #7c3aed; margin-bottom: 24px;">Your Magical Story is Here!</h1>
           <p style="font-size: 16px; line-height: 1.6; color: #333;">Hi there!</p>
           <p style="font-size: 16px; line-height: 1.6; color: #333;">
-            Your personalized story <strong>"${story.title}"</strong> featuring <strong>${story.child.name}</strong> is attached as a PDF.
+            Your personalized story <strong>"${escapeHtml(story.title)}"</strong> featuring <strong>${escapeHtml(story.child.name)}</strong> is attached as a PDF.
           </p>
           <p style="font-size: 16px; line-height: 1.6; color: #333;">We hope you enjoy reading it together!</p>
           <br/>

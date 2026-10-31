@@ -124,7 +124,15 @@ export interface PublicStoriesResult {
   pagination: PublicStoriesPagination;
 }
 
-export const getCachedPublicStories = cache(async (page: number = 1, limit: number = 12): Promise<PublicStoriesResult> => {
+const MAX_PUBLIC_STORIES_PER_PAGE = 50;
+
+function toPositiveInt(value: number, fallback: number): number {
+  return Number.isFinite(value) && value >= 1 ? Math.floor(value) : fallback;
+}
+
+export const getCachedPublicStories = cache(async (requestedPage: number = 1, requestedLimit: number = 12): Promise<PublicStoriesResult> => {
+  const page = toPositiveInt(requestedPage, 1);
+  const limit = Math.min(toPositiveInt(requestedLimit, 12), MAX_PUBLIC_STORIES_PER_PAGE);
   const key = `public:${page}:${limit}`;
   const cached = publicStoriesCache.get(key);
   if (cached) return cached as PublicStoriesResult;
@@ -154,7 +162,7 @@ export const getCachedPublicStories = cache(async (page: number = 1, limit: numb
     publishedAt: story.publishedAt,
     childName: story.child.name,
     authorName: story.user.name || "Anonymous",
-    coverImage: (story.content as any)[0]?.imageUrl || null,
+    coverImage: (story.content as Array<{ imageUrl?: string }> | null)?.[0]?.imageUrl || null,
   }));
 
   const result = {
@@ -169,6 +177,43 @@ export const getCachedPublicStories = cache(async (page: number = 1, limit: numb
 
   publicStoriesCache.set(key, result);
   return result;
+});
+
+export interface PublicStoryDetail {
+  id: string;
+  title: string;
+  moral: string;
+  content: Array<{ pageNumber: number; text: string; imageUrl: string }>;
+  pageCount: number;
+  publishedAt: Date | null;
+  childName: string;
+  authorName: string;
+}
+
+export const getPublicStory = cache(async (id: string): Promise<PublicStoryDetail | null> => {
+  const story = await prisma.story.findFirst({
+    where: { id, isPublic: true },
+    include: {
+      child: { select: { name: true } },
+      user: { select: { name: true } },
+    },
+  });
+
+  if (!story) return null;
+
+  const pages = (story.content ?? []) as Array<{ pageNumber: number; text: string; imageUrl: string }>;
+
+  return {
+    id: story.id,
+    title: story.title,
+    moral: story.moral,
+    // imageBase64 duplicates imageUrl and is only needed for PDF generation.
+    content: pages.map(({ pageNumber, text, imageUrl }) => ({ pageNumber, text, imageUrl })),
+    pageCount: story.pageCount,
+    publishedAt: story.publishedAt,
+    childName: story.child.name,
+    authorName: story.user.name || "Anonymous",
+  };
 });
 
 export function clearDataCache() {

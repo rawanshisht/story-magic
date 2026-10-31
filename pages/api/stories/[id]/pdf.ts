@@ -7,9 +7,9 @@ import { downloadImageAsBase64 } from "@/lib/openai";
 import {
   processImageForPdf,
   type ImageOptimizationConfig,
-  getImageSizeInfo,
 } from "@/lib/image-optimizer";
 import { generatePDFForEmail } from "@/lib/pdf-generator-email";
+import { getUserIdFromToken } from "@/lib/auth-helper";
 
 // Zod schema for validating StoryPage content
 const StoryPageSchema = z.object({
@@ -34,8 +34,6 @@ async function ensureImageBase64(page: StoryPage): Promise<StoryPage> {
   if (page.imageBase64 && page.imageBase64.startsWith("data:")) {
     try {
       const optimized = await processImageForPdf(page.imageBase64, PDF_IMAGE_CONFIG);
-      const info = getImageSizeInfo(optimized);
-      console.log("Page " + page.pageNumber + ": Size " + info.formattedSize);
       return { ...page, imageBase64: optimized };
     } catch (error) {
       console.warn("Failed to optimize image for page " + page.pageNumber + ":", error);
@@ -64,7 +62,6 @@ function cachePdfAsync(storyId: string, pdfBuffer: Buffer): void {
       where: { id: storyId },
       data: { cachedPdf: pdfBuffer },
     })
-    .then(() => console.log("[PDF] Cached to database"))
     .catch((err) => console.error("[PDF] Failed to cache:", err));
 }
 
@@ -80,47 +77,50 @@ export default async function handler(
   }
 
   try {
-    console.log("[PDF] Request for story: " + id);
+    if (typeof id !== "string") {
+      return res.status(400).json({ error: "Invalid story id" });
+    }
 
-    // First, check if cached PDF exists (without fetching the large blob)
     const cacheCheck = await prisma.story.findUnique({
-      where: { id: id as string },
-      select: { id: true, title: true, cachedPdf: true },
+      where: { id },
+      select: { title: true, userId: true, isPublic: true, cachedPdf: true },
     });
 
-    if (!cacheCheck) {
-      console.log("[PDF] Story not found: " + id);
-      return res.status(404).json({ error: "Story not found", storyId: id });
+    // Public stories can be downloaded by anyone; private ones only by their
+    // owner. Unknown and private stories get the same response, so callers
+    // can't tell which story IDs exist.
+    if (!cacheCheck?.isPublic) {
+      const token = req.cookies["firebase-auth"];
+      const userId = token ? await getUserIdFromToken(token) : null;
+      if (!userId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+      if (!cacheCheck || cacheCheck.userId !== userId) {
+        return res.status(404).json({ error: "Story not found" });
+      }
     }
 
     // Return cached PDF if available
     if (cacheCheck.cachedPdf) {
-      const duration = Date.now() - startTime;
-      console.log("[PDF] Returning cached PDF in " + duration + "ms");
-
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader(
         "Content-Disposition",
         "attachment; filename=\"" + cacheCheck.title.replace(/[^a-z0-9]/gi, "_") + ".pdf\""
       );
       res.setHeader("Content-Length", cacheCheck.cachedPdf.length.toString());
-      res.setHeader("X-Debug-Time", duration.toString());
-      res.setHeader("X-Debug-Cached", "true");
 
       return res.send(Buffer.from(cacheCheck.cachedPdf));
     }
 
     // No cache - fetch full story data for generation
     const story = await prisma.story.findUnique({
-      where: { id: id as string },
+      where: { id },
       include: { child: true },
     });
 
     if (!story) {
       return res.status(404).json({ error: "Story not found" });
     }
-
-    console.log("[PDF] No cache, generating for: " + story.title);
 
     // Validate and parse the JSON content using Zod
     const rawContent = story.content as unknown;
@@ -130,31 +130,17 @@ export default async function handler(
       console.error("[PDF] Invalid story content:", parseResult.error);
       return res.status(500).json({
         error: "Invalid story content structure",
-        validationError: parseResult.error.message,
       });
     }
 
     let pages = parseResult.data;
-    console.log("[PDF] Valid pages: " + pages.length);
-
-    // Log original total size
-    const originalSize = pages.reduce((sum, page) => {
-      if (page.imageBase64) {
-        const info = getImageSizeInfo(page.imageBase64);
-        return sum + info.originalSize;
-      }
-      return sum;
-    }, 0);
-    console.log("[PDF] Original images size: " + (originalSize / 1024).toFixed(2) + " KB");
 
     // Ensure all images have base64 data
     pages = await Promise.all(pages.map(ensureImageBase64));
 
     const moral = getMoralById(story.moral);
-    console.log("[PDF] Moral: " + (moral?.label || story.moral));
 
     // Generate PDF using pdf-lib (faster than pdfkit)
-    console.log("[PDF] Starting PDF generation with pdf-lib...");
     const pdfBuffer = await generatePDFForEmail({
       title: story.title,
       childName: story.child.name,
@@ -167,7 +153,7 @@ export default async function handler(
     console.log("[PDF] PDF generated: " + pdfSizeKB + " KB in " + duration + "ms");
 
     // Cache PDF asynchronously (don't wait)
-    cachePdfAsync(id as string, pdfBuffer);
+    cachePdfAsync(id, pdfBuffer);
 
     // Return PDF
     res.setHeader("Content-Type", "application/pdf");
@@ -176,9 +162,6 @@ export default async function handler(
       "attachment; filename=\"" + story.title.replace(/[^a-z0-9]/gi, "_") + ".pdf\""
     );
     res.setHeader("Content-Length", pdfBuffer.length.toString());
-    res.setHeader("X-Debug-Time", duration.toString());
-    res.setHeader("X-Debug-Size", pdfSizeKB);
-    res.setHeader("X-Debug-Pages", pages.length.toString());
 
     return res.send(pdfBuffer);
   } catch (error) {
@@ -186,9 +169,7 @@ export default async function handler(
     console.error("[PDF] Generation failed after " + duration + "ms:", error);
 
     return res.status(500).json({
-      error: error instanceof Error ? error.message : "Failed to generate PDF",
-      stack: error instanceof Error ? error.stack : undefined,
-      duration: duration + "ms",
+      error: "Failed to generate PDF",
     });
   }
 }

@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { Toaster } from "@/components/ui/toaster";
 import { GoogleAnalytics } from '@next/third-parties/google'
+import { SITE_URL } from "@/lib/site";
 
 const nunito = Nunito({
   subsets: ["latin"],
@@ -30,6 +31,7 @@ const specialElite = Special_Elite({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Story Magic - Personalized Children's Stories",
     template: "%s | Story Magic",
@@ -56,26 +58,17 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://storymagic.app",
+    url: SITE_URL,
     siteName: "Story Magic",
     title: "Story Magic - Personalized Children's Stories",
     description:
       "Create magical, AI-generated stories featuring your child as the hero. Personalized tales with beautiful illustrations and meaningful morals.",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Story Magic - Personalized Children's Stories",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Story Magic - Personalized Children's Stories",
     description:
       "Create magical, AI-generated stories featuring your child as the hero.",
-    images: ["/og-image.png"],
     creator: "@storymagic",
   },
   robots: {
@@ -100,15 +93,7 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "Story Magic",
-    url: "https://storymagic.app",
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: "https://storymagic.app/search?q={search_term_string}",
-      },
-      "query-input": "required name=search_term_string",
-    },
+    url: SITE_URL,
     description:
       "Create magical, AI-generated personalized stories featuring your child as the hero.",
     author: {
@@ -118,10 +103,6 @@ export default function RootLayout({
     publisher: {
       "@type": "Organization",
       name: "Story Magic",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://mystorymagic.uk/icon.svg",
-      },
     },
   };
 

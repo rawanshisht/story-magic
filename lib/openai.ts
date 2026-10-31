@@ -1,33 +1,43 @@
 import OpenAI from "openai";
 
-export const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Created on first use so that importing this module (e.g. during `next build`)
+// doesn't require OPENAI_API_KEY to be set.
+let client: OpenAI | null = null;
+
+export function getOpenAI(): OpenAI {
+  if (!client) {
+    client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  }
+  return client;
+}
+
+// Story content can be edited by its owner, so only fetch images from hosts
+// we know serve generated illustrations.
+const ALLOWED_IMAGE_HOSTS = new Set(["oaidalleapiprodscus.blob.core.windows.net"]);
 
 // Download image from URL and convert to base64
 export async function downloadImageAsBase64(url: string): Promise<string> {
-  console.log(`[OpenAI Image] Downloading image from URL (length: ${url.length}): ${url.slice(0, 80)}...`);
-
   // If URL is already base64, return as-is
   if (url.startsWith("data:image/")) {
-    console.log(`[OpenAI Image] URL is already base64 data, returning as-is`);
     return url;
+  }
+
+  const parsed = new URL(url);
+  if (parsed.protocol !== "https:" || !ALLOWED_IMAGE_HOSTS.has(parsed.hostname)) {
+    throw new Error(`Refusing to download image from untrusted host: ${parsed.hostname}`);
   }
 
   try {
     const response = await fetch(url);
-    console.log(`[OpenAI Image] Fetch response: status=${response.status}, ok=${response.ok}, contentType=${response.headers.get("content-type")}`);
 
     if (!response.ok) {
       throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
     }
     const arrayBuffer = await response.arrayBuffer();
-    console.log(`[OpenAI Image] Downloaded ${arrayBuffer.byteLength} bytes`);
 
     const buffer = Buffer.from(arrayBuffer);
     const base64 = buffer.toString("base64");
     const contentType = response.headers.get("content-type") || "image/png";
-    console.log(`[OpenAI Image] Converted to base64 (length: ${base64.length}), contentType: ${contentType}`);
 
     return `data:${contentType};base64,${base64}`;
   } catch (error) {
@@ -43,7 +53,7 @@ export async function downloadImageAsBase64(url: string): Promise<string> {
  * Generate speech from text using OpenAI TTS-1 model
  */
 export async function generateSpeech(input: string): Promise<ArrayBuffer> {
-  const mp3 = await openai.audio.speech.create({
+  const mp3 = await getOpenAI().audio.speech.create({
     model: "tts-1",
     voice: "coral",
     input: input,
@@ -54,7 +64,7 @@ export async function generateSpeech(input: string): Promise<ArrayBuffer> {
 }
 
 export async function generateStoryText(prompt: string): Promise<string> {
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: "gpt-4o-mini",
     messages: [
       {
@@ -78,7 +88,7 @@ export async function generateIllustration(prompt: string): Promise<string> {
   console.log(`[OpenAI Image] Starting generation with prompt: ${truncatedPrompt}`);
 
   try {
-    const response = await openai.images.generate({
+    const response = await getOpenAI().images.generate({
       model: "gpt-image-1",
       prompt: `Children's book watercolor illustration. Soft brushstrokes, delicate watercolor style.
 

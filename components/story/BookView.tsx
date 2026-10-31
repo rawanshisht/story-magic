@@ -8,6 +8,11 @@ import { Button } from "@/components/ui/button";
 import { StoryPage } from "@/types";
 import { cn } from "@/lib/utils";
 
+// The parts of the react-pageflip instance API we use
+interface PageFlipHandle {
+  pageFlip(): { flipPrev(): void; flipNext(): void } | undefined;
+}
+
 // Dynamic import for react-pageflip to avoid SSR issues
 const HTMLFlipBook = dynamic(() => import("react-pageflip"), {
   ssr: false,
@@ -51,9 +56,9 @@ export function BookView({
   onClose,
   storyTitle
 }: BookViewProps) {
-  const bookRef = useRef<any>(null);
+  const bookRef = useRef<PageFlipHandle>(null);
 
-  const onFlip = useCallback((e: any) => {
+  const onFlip = useCallback((e: { data: number }) => {
     onPageChange(e.data);
   }, [onPageChange]);
 

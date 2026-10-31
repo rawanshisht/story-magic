@@ -54,3 +54,10 @@ next-env.d.ts
 
 # Local Netlify folder
 .netlify
+
+# Playwright output
+/playwright-report/
+/test-results/
+
+# Firebase CLI cache
+/.firebase/

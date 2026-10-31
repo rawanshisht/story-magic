@@ -118,7 +118,7 @@ export function StoryViewClient({ storyId, title, pages }: StoryViewClientProps)
               Send Story by Email
             </DialogTitle>
             <DialogDescription>
-              Send "{title}" as a PDF attachment to any email address.
+              Send &ldquo;{title}&rdquo; as a PDF attachment to any email address.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">

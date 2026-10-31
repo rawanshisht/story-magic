@@ -275,17 +275,24 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
       };
     }
 
-    const job = await prisma.storyJob.findUnique({
-      where: { id: jobId },
+    // Atomically claim the job so a job ID can only ever trigger one
+    // (paid) generation, even if this endpoint is called repeatedly.
+    const claimed = await prisma.storyJob.updateMany({
+      where: { id: jobId, status: "processing", progress: 0 },
+      data: { progress: 1 },
     });
 
-    if (!job) {
-      console.error(`[Generate Background] Job not found: ${jobId}`);
+    if (claimed.count === 0) {
+      console.error(`[Generate Background] Job not found or already started: ${jobId}`);
       return {
-        statusCode: 404,
-        body: JSON.stringify({ error: "Job not found" }),
+        statusCode: 409,
+        body: JSON.stringify({ error: "Job not found or already started" }),
       };
     }
+
+    const job = await prisma.storyJob.findUniqueOrThrow({
+      where: { id: jobId },
+    });
 
     const childData = await prisma.child.findUnique({
       where: { id: job.childId },
@@ -341,8 +348,8 @@ export const handler: Handler = async (event: HandlerEvent, context: HandlerCont
         childId: job.childId,
         userId: job.userId,
         pageCount: generatedStory.pages.length,
-        isPublic: job.isPublic !== false,
-        publishedAt: job.isPublic !== false ? new Date() : null,
+        isPublic: job.isPublic === true,
+        publishedAt: job.isPublic === true ? new Date() : null,
       },
       include: { child: true },
     });

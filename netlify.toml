@@ -5,7 +5,7 @@
 [functions]
   directory = "functions"
   node_bundler = "esbuild"
-  external_node_modules = ["@prisma/client", "firebase-admin", "pdfkit", "sharp"]
+  external_node_modules = ["@prisma/client", "firebase-admin", "sharp"]
 
 
 [dev]

@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 
 const protectedPaths = ["/dashboard", "/create", "/stories"];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const firebaseAuthCookie = request.cookies.get("firebase-auth");
 
   const { pathname } = request.nextUrl;

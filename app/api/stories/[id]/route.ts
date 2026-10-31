@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAuthenticatedUserId } from "@/lib/auth-helper";
 import prisma from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { StoryPage } from "@/types";
 
 interface RouteParams {
@@ -90,7 +91,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
         // Merge new text updates into existing pages (preserving images)
         const mergedContent = existingPages.map((page, index) => {
           const update = newPages[index];
-          if (update) {
+          if (update && typeof update.text === "string") {
             return {
               ...page,
               text: update.text
@@ -102,11 +103,13 @@ export async function PUT(request: Request, { params }: RouteParams) {
         await prisma.story.update({
           where: { id, userId },
           data: {
-            content: mergedContent as any,
+            content: mergedContent as unknown as Prisma.InputJsonValue,
             cachedPdf: null,
             updatedAt: new Date(),
           },
-        });    console.log(`[Story Update] Total: ${Date.now() - startTime}ms`);
+        });
+
+    console.log(`[Story Update] Total: ${Date.now() - startTime}ms`);
 
     return NextResponse.json({ success: true });
   } catch (error) {

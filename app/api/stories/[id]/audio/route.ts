@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getAuthenticatedUserId } from "@/lib/auth-helper";
 import prisma from "@/lib/prisma";
 import { generateSpeech } from "@/lib/openai";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { StoryPage } from "@/types";
 
 interface RouteParams {
@@ -15,6 +16,13 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!checkRateLimit(`story-audio:${userId}`, 5, 60 * 60 * 1000)) {
+      return NextResponse.json(
+        { error: "Too many audio downloads. Please try again later." },
+        { status: 429 }
+      );
     }
 
     const story = await prisma.story.findUnique({

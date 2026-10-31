@@ -11,7 +11,15 @@ export async function getAuthenticatedUserId(): Promise<string | null> {
     return null;
   }
 
-  const decodedToken = await verifyFirebaseToken(firebaseAuth.value);
+  return getUserIdFromToken(firebaseAuth.value);
+}
+
+/**
+ * Verifies a Firebase ID token and returns the matching database user ID,
+ * creating the user record on first sign-in.
+ */
+export async function getUserIdFromToken(idToken: string): Promise<string | null> {
+  const decodedToken = await verifyFirebaseToken(idToken);
   if (!decodedToken) {
     return null;
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, ReactNode } from "react";
 import {
   User,
   GoogleAuthProvider,
@@ -8,10 +8,12 @@ import {
   browserPopupRedirectResolver,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  updateProfile,
   signOut,
-  onAuthStateChanged,
+  onIdTokenChanged,
 } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { clearAuthCookie, getPostLoginRedirect, setAuthCookie } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 
 interface AuthContextType {
@@ -25,18 +27,22 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-async function syncUserToDatabase(user: User) {
+async function syncUserToDatabase(user: User, idToken: string) {
   try {
-    await fetch("/api/auth/sync-user", {
+    const response = await fetch("/api/auth/sync-user", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${idToken}`,
+      },
       body: JSON.stringify({
-        uid: user.uid,
-        email: user.email,
-        name: user.displayName || user.email?.split("@")[0],
+        name: user.displayName,
         photoURL: user.photoURL,
       }),
     });
+    if (!response.ok) {
+      console.error("Failed to sync user to database:", response.status);
+    }
   } catch (error) {
     console.error("Failed to sync user to database:", error);
   }
@@ -45,30 +51,45 @@ async function syncUserToDatabase(user: User) {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const syncedUid = useRef<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setUser(user);
-
+    // Fires on sign-in, sign-out and whenever Firebase refreshes the ID token
+    // (roughly hourly), which keeps the server-side auth cookie valid.
+    const unsubscribe = onIdTokenChanged(auth, async (user) => {
       if (user) {
         try {
-          const idToken = await user.getIdToken(true);
-          document.cookie = `firebase-auth=${idToken}; path=/; max-age=3600; SameSite=Lax`;
-          await syncUserToDatabase(user);
+          const idToken = await user.getIdToken();
+          setAuthCookie(idToken);
+          if (syncedUid.current !== user.uid) {
+            syncedUid.current = user.uid;
+            await syncUserToDatabase(user, idToken);
+          }
         } catch (error) {
-          console.error("Failed to refresh ID token:", error);
-          document.cookie = "firebase-auth=; path=/; max-age=0";
+          console.error("Failed to get ID token:", error);
+          clearAuthCookie();
         }
       } else {
-        document.cookie = "firebase-auth=; path=/; max-age=0";
+        syncedUid.current = null;
+        clearAuthCookie();
       }
 
+      setUser(user);
       setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
+
+  // Set the cookie before navigating so the middleware sees the new session.
+  const completeSignIn = async (user: User) => {
+    const idToken = await user.getIdToken();
+    setAuthCookie(idToken);
+    syncedUid.current = user.uid;
+    await syncUserToDatabase(user, idToken);
+    router.push(getPostLoginRedirect());
+  };
 
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
@@ -76,42 +97,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       prompt: 'select_account'
     });
     const result = await signInWithPopup(auth, provider, browserPopupRedirectResolver);
-    if (result.user) {
-      // Set cookie immediately before redirect to avoid race condition
-      const idToken = await result.user.getIdToken();
-      document.cookie = `firebase-auth=${idToken}; path=/; max-age=3600; SameSite=Lax`;
-      await syncUserToDatabase(result.user);
-      router.push("/dashboard");
-    }
+    await completeSignIn(result.user);
   };
 
   const signInWithEmail = async (email: string, password: string) => {
     const result = await signInWithEmailAndPassword(auth, email, password);
-    // Set cookie immediately before redirect to avoid race condition
-    const idToken = await result.user.getIdToken();
-    document.cookie = `firebase-auth=${idToken}; path=/; max-age=3600; SameSite=Lax`;
-    await syncUserToDatabase(result.user);
-    router.push("/dashboard");
+    await completeSignIn(result.user);
   };
 
   const signUpWithEmail = async (email: string, password: string, name?: string) => {
     const { user } = await createUserWithEmailAndPassword(auth, email, password);
-    
+
     if (name) {
-      await import("firebase/auth").then(({ updateProfile }) => 
-        updateProfile(user, { displayName: name })
-      );
+      await updateProfile(user, { displayName: name });
     }
-    
-    // Set cookie immediately before redirect to avoid race condition
-    const idToken = await user.getIdToken();
-    document.cookie = `firebase-auth=${idToken}; path=/; max-age=3600; SameSite=Lax`;
-    await syncUserToDatabase(user);
-    router.push("/dashboard");
+
+    await completeSignIn(user);
   };
 
   const logout = async () => {
-    document.cookie = "firebase-auth=; path=/; max-age=0";
+    clearAuthCookie();
     await signOut(auth);
     router.push("/");
   };

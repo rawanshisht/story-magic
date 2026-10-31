@@ -16,9 +16,11 @@ interface StoryPreviewProps {
   storyId: string;
   onSave?: (pages: StoryPage[]) => Promise<void>;
   onEmailClick?: () => void;
+  /** Audio is generated per request and only available to the story's owner. */
+  canUseAudio?: boolean;
 }
 
-export function StoryPreview({ title, pages, storyId, onSave, onEmailClick }: StoryPreviewProps) {
+export function StoryPreview({ title, pages, storyId, onSave, onEmailClick, canUseAudio = true }: StoryPreviewProps) {
   // Core state
   const [isBookOpen, setIsBookOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
@@ -149,20 +151,22 @@ export function StoryPreview({ title, pages, storyId, onSave, onEmailClick }: St
               {isDownloadingPdf ? "Generating..." : "Download PDF"}
             </Button>
             
-            <Button
-              variant="outline"
-              size="lg"
-              className="rounded-full h-14 px-8 text-base border-2 hover:scale-105 transition-transform"
-              onClick={handleDownloadAudio}
-              disabled={isDownloadingAudio}
-            >
-              {isDownloadingAudio ? (
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              ) : (
-                <Volume2 className="mr-2 h-5 w-5" />
-              )}
-              {isDownloadingAudio ? "Generating..." : "Audio Book"}
-            </Button>
+            {canUseAudio && (
+              <Button
+                variant="outline"
+                size="lg"
+                className="rounded-full h-14 px-8 text-base border-2 hover:scale-105 transition-transform"
+                onClick={handleDownloadAudio}
+                disabled={isDownloadingAudio}
+              >
+                {isDownloadingAudio ? (
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                ) : (
+                  <Volume2 className="mr-2 h-5 w-5" />
+                )}
+                {isDownloadingAudio ? "Generating..." : "Audio Book"}
+              </Button>
+            )}
             
             {onEmailClick && (
               <Button
@@ -201,20 +205,22 @@ export function StoryPreview({ title, pages, storyId, onSave, onEmailClick }: St
               {isDownloadingPdf ? "Generating..." : "Download PDF"}
             </Button>
             
-            <Button
-              variant="outline"
-              size="lg"
-              className="rounded-full h-14 px-8 text-base border-2 hover:scale-105 transition-transform"
-              onClick={handleDownloadAudio}
-              disabled={isDownloadingAudio}
-            >
-              {isDownloadingAudio ? (
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              ) : (
-                <Volume2 className="mr-2 h-5 w-5" />
-              )}
-              {isDownloadingAudio ? "Generating..." : "Audio Book"}
-            </Button>
+            {canUseAudio && (
+              <Button
+                variant="outline"
+                size="lg"
+                className="rounded-full h-14 px-8 text-base border-2 hover:scale-105 transition-transform"
+                onClick={handleDownloadAudio}
+                disabled={isDownloadingAudio}
+              >
+                {isDownloadingAudio ? (
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                ) : (
+                  <Volume2 className="mr-2 h-5 w-5" />
+                )}
+                {isDownloadingAudio ? "Generating..." : "Audio Book"}
+              </Button>
+            )}
             
             {onEmailClick && (
               <Button
@@ -263,20 +269,22 @@ export function StoryPreview({ title, pages, storyId, onSave, onEmailClick }: St
               {isDownloadingPdf ? "Generating..." : "Download PDF"}
             </Button>
             
-            <Button
-              variant="outline"
-              size="lg"
-              className="rounded-full h-14 px-8 text-base border-2 hover:scale-105 transition-transform"
-              onClick={handleDownloadAudio}
-              disabled={isDownloadingAudio}
-            >
-              {isDownloadingAudio ? (
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              ) : (
-                <Volume2 className="mr-2 h-5 w-5" />
-              )}
-              {isDownloadingAudio ? "Generating..." : "Audio Book"}
-            </Button>
+            {canUseAudio && (
+              <Button
+                variant="outline"
+                size="lg"
+                className="rounded-full h-14 px-8 text-base border-2 hover:scale-105 transition-transform"
+                onClick={handleDownloadAudio}
+                disabled={isDownloadingAudio}
+              >
+                {isDownloadingAudio ? (
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                ) : (
+                  <Volume2 className="mr-2 h-5 w-5" />
+                )}
+                {isDownloadingAudio ? "Generating..." : "Audio Book"}
+              </Button>
+            )}
             
             {onEmailClick && (
               <Button
@@ -291,10 +299,12 @@ export function StoryPreview({ title, pages, storyId, onSave, onEmailClick }: St
             )}
             
             {/* Listen to Current Page Button - only when book is open */}
-            <AudioPlayer 
-              text={currentPageText} 
-              className="flex-shrink-0"
-            />
+            {canUseAudio && (
+              <AudioPlayer
+                text={currentPageText}
+                className="flex-shrink-0"
+              />
+            )}
           </div>
         </div>
       )}

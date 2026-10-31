@@ -6,22 +6,10 @@ import { StoryPreview } from "@/components/story/StoryPreview";
 import { StoryPage } from "@/types";
 import { getMoralById } from "@/config/morals";
 import { formatDate } from "@/lib/utils";
+import { getPublicStory } from "@/lib/data-cache";
 
 interface BookstoreStoryPageProps {
   params: Promise<{ id: string }>;
-}
-
-async function getPublicStory(id: string) {
-  try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    const response = await fetch(`${baseUrl}/api/bookstore/${id}`, {
-      cache: "no-store",
-    });
-    if (!response.ok) return null;
-    return response.json();
-  } catch (error) {
-    return null;
-  }
 }
 
 export default async function BookstoreStoryPage({
@@ -34,7 +22,7 @@ export default async function BookstoreStoryPage({
     notFound();
   }
 
-  const content = story.content as StoryPage[];
+  const content: StoryPage[] = story.content;
   const moral = getMoralById(story.moral);
 
   return (
@@ -76,8 +64,12 @@ export default async function BookstoreStoryPage({
               </div>
               <span>•</span>
               <span>By {story.authorName}</span>
-              <span>•</span>
-              <span>Published {formatDate(story.publishedAt)}</span>
+              {story.publishedAt && (
+                <>
+                  <span>•</span>
+                  <span>Published {formatDate(story.publishedAt)}</span>
+                </>
+              )}
             </div>
             {moral && (
               <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-bold text-primary">
@@ -92,6 +84,7 @@ export default async function BookstoreStoryPage({
               title={story.title}
               pages={content}
               storyId={story.id}
+              canUseAudio={false}
             />
           </div>
 

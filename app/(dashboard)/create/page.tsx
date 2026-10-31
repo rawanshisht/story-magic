@@ -69,7 +69,7 @@ export default function CreateStoryPage() {
   const [customTheme, setCustomTheme] = useState<string>("");
   const [pageCount, setPageCount] = useState<number | undefined>(undefined);
   const [showNewChildForm, setShowNewChildForm] = useState(false);
-  const [isPublic, setIsPublic] = useState<boolean>(true);
+  const [isPublic, setIsPublic] = useState<boolean>(false);
   const [jobId, setJobId] = useState<string | null>(null);
   const [generationProgress, setGenerationProgress] = useState(0);
   const [isPolling, setIsPolling] = useState(false);
@@ -438,6 +438,7 @@ export default function CreateStoryPage() {
                     placeholder="e.g. a candy castle, outer space..."
                     value={customSetting}
                     onChange={(e) => setCustomSetting(e.target.value)}
+                    maxLength={200}
                   />
                 </div>
 
@@ -449,6 +450,7 @@ export default function CreateStoryPage() {
                     placeholder="e.g. funny adventure, spooky mystery..."
                     value={customTheme}
                     onChange={(e) => setCustomTheme(e.target.value)}
+                    maxLength={200}
                   />
                 </div>
               </div>

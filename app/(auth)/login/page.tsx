@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
@@ -19,14 +19,22 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 import { BookOpen } from "lucide-react";
+import { getAuthErrorMessage, getPostLoginRedirect } from "@/lib/auth-client";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { signInWithGoogle, signInWithEmail } = useAuth();
+  const { user, loading, signInWithGoogle, signInWithEmail } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  // Already signed in (e.g. returning after the auth cookie expired): continue on.
+  useEffect(() => {
+    if (!loading && user && !isLoading) {
+      router.replace(getPostLoginRedirect());
+    }
+  }, [loading, user, isLoading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +43,7 @@ export default function LoginPage() {
     try {
       await signInWithEmail(email, password);
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to sign in";
+      const errorMessage = getAuthErrorMessage(error, "Failed to sign in");
       toast({
         title: "Error",
         description: errorMessage,
@@ -51,7 +59,7 @@ export default function LoginPage() {
     try {
       await signInWithGoogle();
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to sign in with Google";
+      const errorMessage = getAuthErrorMessage(error, "Failed to sign in with Google");
       toast({
         title: "Error",
         description: errorMessage,

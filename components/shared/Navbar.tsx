@@ -53,11 +53,11 @@ export function Navbar() {
           <span className="text-xl md:text-2xl font-extrabold text-primary tracking-tight truncate">Story Magic</span>
         </Link>
 
-        <div className="flex items-center space-x-2 md:space-x-4">
-          <Link href="/bookstore" className="hidden md:block">
-            <Button variant="ghost" size="lg" className="text-lg font-bold text-foreground">
-              <Store className="mr-2 h-6 w-6 text-accent" />
-              Bookstore
+        <div className="flex items-center space-x-2 md:space-x-4 shrink-0">
+          <Link href="/bookstore" aria-label="Bookstore">
+            <Button variant="ghost" size="sm" className="px-2 font-bold text-foreground md:h-14 md:px-8 md:text-lg">
+              <Store className="h-5 w-5 text-accent md:mr-2 md:h-6 md:w-6" />
+              <span className="hidden md:inline">Bookstore</span>
             </Button>
           </Link>
           {user ? (
@@ -143,19 +143,13 @@ export function Navbar() {
             </>
           ) : (
             <>
-              <Link href="/bookstore">
-                <Button variant="ghost" size="lg" className="text-lg font-bold">
-                  <Store className="mr-2 h-6 w-6 text-accent" />
-                  Bookstore
-                </Button>
-              </Link>
               <Link href="/login">
-                <Button variant="ghost" size="lg" className="text-lg font-bold">
+                <Button variant="ghost" size="sm" className="font-bold md:h-14 md:px-8 md:text-lg">
                   Sign in
                 </Button>
               </Link>
               <Link href="/register">
-                <Button size="lg" variant="default" className="text-lg">Get Started</Button>
+                <Button size="sm" variant="default" className="md:h-14 md:px-8 md:text-lg">Get Started</Button>
               </Link>
             </>
           )}

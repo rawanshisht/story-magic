@@ -37,7 +37,7 @@ const features = [
     icon: Shield,
     title: "Safe & Private",
     description:
-      "Your children's information is encrypted and never shared. We prioritize your family's privacy.",
+      "Stories stay private unless you choose to share them in the Bookstore. We prioritize your family's privacy.",
   },
   {
     icon: Zap,

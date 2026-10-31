@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { generatePDF } from '@/lib/pdf-generator';
+import { generatePDFForEmail as generatePDF } from '@/lib/pdf-generator-email';
 import type { StoryPage } from '@/types';
+import { PDFDocument } from 'pdf-lib';
 
 test.describe('PDF Image Overlap Fix', () => {
   
@@ -100,8 +101,7 @@ test.describe('PDF Image Overlap Fix', () => {
       
       // The PDF should have multiple pages (more than 1)
       // We can check the PDF structure for page count
-      const pdfStr = pdfBuffer.toString('latin1');
-      const pageCount = (pdfStr.match(/\/Type\s*\/Page[^/]*/g) || []).length;
+      const pageCount = (await PDFDocument.load(pdfBuffer)).getPageCount();
       expect(pageCount).toBeGreaterThan(1);
     });
 
@@ -128,8 +128,7 @@ test.describe('PDF Image Overlap Fix', () => {
       expect(pdfBuffer.slice(0, 4).toString()).toBe('%PDF');
       
       // Check that we don't have more pages than needed
-      const pdfStr = pdfBuffer.toString('latin1');
-      const pageCount = (pdfStr.match(/\/Type\s*\/Page[^/]*/g) || []).length;
+      const pageCount = (await PDFDocument.load(pdfBuffer)).getPageCount();
       
             // Should have exactly 2 story pages + cover + end page = 4 pages
             // But definitely NOT more than 4
@@ -231,8 +230,7 @@ test.describe('PDF Image Overlap Fix', () => {
       expect(pdfBuffer.slice(0, 4).toString()).toBe('%PDF');
       
       // Should have multiple pages (cover + story pages + end)
-      const pdfStr = pdfBuffer.toString('latin1');
-      const pageCount = (pdfStr.match(/\/Type\s*\/Page[^/]*/g) || []).length;
+      const pageCount = (await PDFDocument.load(pdfBuffer)).getPageCount();
       expect(pageCount).toBeGreaterThanOrEqual(3);
     });
   });

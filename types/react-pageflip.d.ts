@@ -25,15 +25,15 @@ declare module 'react-pageflip' {
     startPage?: number;
     style?: React.CSSProperties;
     className?: string;
-    onFlip?: (e: any) => void;
-    onChangeOrientation?: (e: any) => void;
-    onChangeState?: (e: any) => void;
+    onFlip?: (e: { data: number }) => void;
+    onChangeOrientation?: (e: { data: string }) => void;
+    onChangeState?: (e: { data: string }) => void;
   }
 
   export interface IBookProps extends IFlipSetting {
     children: React.ReactNode;
   }
 
-  const HTMLFlipBook: React.ForwardRefExoticComponent<IBookProps & React.RefAttributes<any>>;
+  const HTMLFlipBook: React.ForwardRefExoticComponent<IBookProps & React.RefAttributes<unknown>>;
   export default HTMLFlipBook;
 }

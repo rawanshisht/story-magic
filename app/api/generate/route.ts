@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getAuthenticatedUserId } from "@/lib/auth-helper";
 import prisma from "@/lib/prisma";
 import { generateStory } from "@/lib/story-generator";
+import { STORY_DAILY_LIMIT, getStoriesGeneratedToday } from "@/lib/rate-limit";
 import { Child } from "@/types";
 
 export const maxDuration = 300;
@@ -28,6 +29,23 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Page count must be 4" },
         { status: 400 }
+      );
+    }
+
+    if (
+      (customSetting && (typeof customSetting !== "string" || customSetting.length > 200)) ||
+      (customTheme && (typeof customTheme !== "string" || customTheme.length > 200))
+    ) {
+      return NextResponse.json(
+        { error: "Custom setting and theme must be 200 characters or less" },
+        { status: 400 }
+      );
+    }
+
+    if ((await getStoriesGeneratedToday(userId)) >= STORY_DAILY_LIMIT) {
+      return NextResponse.json(
+        { error: `You can create up to ${STORY_DAILY_LIMIT} stories per day. Please try again tomorrow.` },
+        { status: 429 }
       );
     }
 
@@ -78,8 +96,8 @@ export async function POST(request: Request) {
           childId,
           userId,
           pageCount: generatedStory.pages.length,
-          isPublic: isPublic !== false,
-          publishedAt: isPublic !== false ? new Date() : null,
+          isPublic: isPublic === true,
+          publishedAt: isPublic === true ? new Date() : null,
         },
         include: { child: true },
       });
@@ -103,7 +121,7 @@ export async function POST(request: Request) {
         pageCount: effectivePageCount,
         status: "processing",
         progress: 0,
-        isPublic: isPublic !== false,
+        isPublic: isPublic === true,
       },
     });
 
